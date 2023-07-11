@@ -2274,6 +2274,7 @@ GameObject:
   - component: {fileID: 1256762932}
   - component: {fileID: 1256762931}
   - component: {fileID: 1256762930}
+  - component: {fileID: 1256762934}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -2367,6 +2368,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1256762934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1256762929}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41f84591ce72545258ea98cb7518d8b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1289335084
 GameObject:
   m_ObjectHideFlags: 0
@@ -2815,11 +2828,12 @@ MonoBehaviour:
   networkAddress: localhost
   maxConnections: 100
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 6105613457414769727, guid: 70a7e3953e91e554383d15638167299d,
+  playerPrefab: {fileID: 2487827472793318752, guid: 1363072976f997b458d965930639985d,
     type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 0
-  spawnPrefabs: []
+  spawnPrefabs:
+  - {fileID: 8834528402416724110, guid: 005c2b1ad8275e44a8c4830a7a19fbfc, type: 3}
   snapshotSettings:
     bufferTimeMultiplier: 2
     catchupNegativeThreshold: -1
@@ -2831,9 +2845,11 @@ MonoBehaviour:
     dynamicAdjustmentTolerance: 1
     deliveryTimeEmaDuration: 2
   timeInterpolationGui: 0
+  _minPlayers: 2
   _menuScene: Assets/Scenes/Clean Mirror.unity
-  _roomPlayerPrefab: {fileID: 4918643148302145505, guid: 70a7e3953e91e554383d15638167299d,
+  _roomPlayerPrefab: {fileID: 3695184780352161297, guid: 005c2b1ad8275e44a8c4830a7a19fbfc,
     type: 3}
+  _container: {fileID: 1256762933}
 --- !u!114 &1392512041
 MonoBehaviour:
   m_ObjectHideFlags: 0

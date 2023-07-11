@@ -11,7 +11,6 @@ namespace CleanMirror.UI
         public void HostLobby()
         {
             _networkManager.StartHost();
-
             _landingPagePanel.SetActive(false);
         }
     }
