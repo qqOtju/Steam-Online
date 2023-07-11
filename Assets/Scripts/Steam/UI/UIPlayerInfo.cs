@@ -1,21 +1,22 @@
 ﻿using Mirror;
+using MyMirror;
 using Steamworks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Steam
+namespace Steam.UI
 {
-    public class PlayerInfoDisplay : NetworkBehaviour
+    public class UIPlayerInfo : NetworkBehaviour
     {
-        [SerializeField] private RawImage _profileImage = null;
-        [SerializeField] private TextMeshProUGUI _displayNameText = null;
+        [SerializeField] private RawImage _displayProfileImage;
+        [SerializeField] private TextMeshProUGUI _displayNicknameText;
+
 
         [SyncVar(hook = nameof(HandleSteamIdUpdated))]
         private ulong _steamId;
 
-        protected Callback<AvatarImageLoaded_t> avatarImageLoaded;
-
+        
         #region Server
 
         public void SetSteamId(ulong steamId)
@@ -30,22 +31,22 @@ namespace Steam
         public override void OnStartClient()
         {
             base.OnStartClient();
-            avatarImageLoaded = Callback<AvatarImageLoaded_t>.Create(OnAvatarImageLoaded);
+            Callback<AvatarImageLoaded_t>.Create(OnAvatarImageLoaded);
         }
 
         private void HandleSteamIdUpdated(ulong oldId, ulong newId)
         {
             var cSteamId = new CSteamID(newId);
-            _displayNameText.text = SteamFriends.GetFriendPersonaName(cSteamId);
+            _displayNicknameText.text = SteamFriends.GetFriendPersonaName(cSteamId);
             var imageId = SteamFriends.GetLargeFriendAvatar(cSteamId);
             if (imageId == -1) return;
-            _profileImage.texture = GetSteamImageAsTexture(imageId);
+            _displayProfileImage.texture = GetSteamImageAsTexture(imageId);
         }
 
         private void OnAvatarImageLoaded(AvatarImageLoaded_t callback)
         {
             if(callback.m_steamID.m_SteamID != _steamId) return;
-            _profileImage.texture = GetSteamImageAsTexture(callback.m_iImage);
+            _displayProfileImage.texture = GetSteamImageAsTexture(callback.m_iImage);
         }
         
         private Texture2D GetSteamImageAsTexture(int imageId)
@@ -67,5 +68,6 @@ namespace Steam
         }
 
         #endregion
+
     }
 }
