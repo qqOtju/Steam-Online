@@ -14,7 +14,7 @@ namespace CleanMirror
         [SerializeField] private TMP_Text[] _playerNameTexts;
         [SerializeField] private TMP_Text[] _playerReadyTexts;
         [SerializeField] private Button _startGameButton;
-
+        
         [SyncVar(hook = nameof(HandleDisplayNameChanged))]
         public string _displayName = "Loading...";
 
@@ -129,7 +129,7 @@ namespace CleanMirror
         {
             if (Room.RoomPlayers[0].connectionToClient != connectionToClient)
                 return;
-            //Room.StartGame();
+            Room.StartGame();
         }
 
         #endregion

@@ -2834,6 +2834,7 @@ MonoBehaviour:
   playerSpawnMethod: 0
   spawnPrefabs:
   - {fileID: 8834528402416724110, guid: 005c2b1ad8275e44a8c4830a7a19fbfc, type: 3}
+  - {fileID: 8834528402416724110, guid: faf60bd8ceecf80428c212cde659b8aa, type: 3}
   snapshotSettings:
     bufferTimeMultiplier: 2
     catchupNegativeThreshold: -1
@@ -2846,10 +2847,11 @@ MonoBehaviour:
     deliveryTimeEmaDuration: 2
   timeInterpolationGui: 0
   _minPlayers: 2
-  _menuScene: Assets/Scenes/Clean Mirror.unity
+  _menuScene: Assets/Scenes/Clean Mirror/CleanMirror.unity
   _roomPlayerPrefab: {fileID: 3695184780352161297, guid: 005c2b1ad8275e44a8c4830a7a19fbfc,
     type: 3}
-  _container: {fileID: 1256762933}
+  _gamePlayerPrefab: {fileID: 4968378906180479786, guid: faf60bd8ceecf80428c212cde659b8aa,
+    type: 3}
 --- !u!114 &1392512041
 MonoBehaviour:
   m_ObjectHideFlags: 0

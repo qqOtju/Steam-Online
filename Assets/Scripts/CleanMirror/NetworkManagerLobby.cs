@@ -14,8 +14,11 @@ namespace CleanMirror
 
         [Header("Room")] 
         [SerializeField] private NetworkRoomPlayerController _roomPlayerPrefab;
+        [Header("Game")]
+        [SerializeField] private NetworkGamePlayerController _gamePlayerPrefab;
         
         public List<NetworkRoomPlayerController> RoomPlayers { get; } = new();
+        public List<NetworkGamePlayerController> GamePlayers { get; } = new();
         public static event Action OnClientConnected;
         public static event Action OnClientDisconnected;
 
@@ -58,6 +61,23 @@ namespace CleanMirror
         }
 
         public override void OnStopServer() => RoomPlayers.Clear();
+
+        public override void ServerChangeScene(string newSceneName)
+        {
+            //From menu to game
+            if(SceneManager.GetActiveScene().name == _menuScene.SceneName() && newSceneName.StartsWith("SceneMap"))
+                for (int i = RoomPlayers.Count - 1; i >= 0; i--)
+                {
+                    var conn = RoomPlayers[i].connectionToClient;
+                    var gamePlayerInstance = Instantiate(_gamePlayerPrefab);
+                    gamePlayerInstance.SetDisplayName(RoomPlayers[i]._displayName);
+                    NetworkServer.Destroy(conn.identity.gameObject);
+                    NetworkServer.ReplacePlayerForConnection(conn, gamePlayerInstance.gameObject);
+                }
+            base.ServerChangeScene(newSceneName);
+        }
+
+        
         
         #endregion
 
@@ -68,6 +88,12 @@ namespace CleanMirror
         }
 
         private bool IsReadyToStart() => numPlayers >= _minPlayers && RoomPlayers.All(player => player._isReady);
+
+        public void StartGame()
+        {
+            if (SceneManager.GetActiveScene().name != _menuScene.SceneName() || !IsReadyToStart()) return;
+            ServerChangeScene("SceneMap_01");
+        }
         
     }
 }
