@@ -1,5 +1,7 @@
 ﻿using Mirror;
+using MyMirror;
 using Steamworks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,38 +13,56 @@ namespace Steam
         [SerializeField] private GameObject _menuPanel;
         [SerializeField] private GameObject _lobbyPanel;
         [Header("Other")]
+        [SerializeField] private TextMeshProUGUI _lobbyNameText;
         [Scene] [SerializeField] private string _menuScene = null;
-        [SerializeField] private NetworkManager _networkManager;
+        [SerializeField] private MyNetworkManager _networkManager;
 
+        public static SteamLobby Instance;
         public static CSteamID LobbyId { get; private set; }
+        public static ulong CurrentLobbyId { get; private set; }
 
         private const string HostAddressKey = "HostAddress";
 
-        private void Start()
+        private void Awake()
         {
-            if(!SteamManager.Initialized) return;
-            _menuScene = _menuScene.SceneName();
+            if(!SteamManager.Initialized)
+            {
+                _lobbyNameText.gameObject.SetActive(true);
+                _lobbyNameText.text = "Steam is not initialized";
+                return;
+            }
+
+            if (Instance == null) Instance = this;
             Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
             Callback<LobbyCreated_t>.Create(OnLobbyCreated);
             Callback<LobbyEnter_t>.Create(OnLobbyEntered);
-        }
-
+            Callback<LobbyKicked_t>.Create(OnLobbyLeave);
+        }     
+        
         public void HostLobby()
         {
             _menuPanel.SetActive(false);
             _lobbyPanel.SetActive(true);
-            SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, _networkManager.maxConnections);
+            SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, _networkManager.maxConnections);
         }
         
         public void StartGame()
         {
-            Debug.Log($"1: {SceneManager.GetActiveScene().name}| 2: {_menuScene}");
-            if (SceneManager.GetActiveScene().name == _menuScene)
+            if (SceneManager.GetActiveScene().name == _menuScene.SceneName())
             {
                 _networkManager.ServerChangeScene("Scene_Map_01");
             }
         }
 
+        public void LeaveLobby()
+        {
+            _menuPanel.gameObject.SetActive(true);
+            _lobbyPanel.gameObject.SetActive(false);
+        }
+        
+        private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t callback) =>
+            SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
+        
         private void OnLobbyCreated(LobbyCreated_t callback)
         {
             if (callback.m_eResult != EResult.k_EResultOK)
@@ -55,22 +75,21 @@ namespace Steam
             _networkManager.StartHost();
             SteamMatchmaking.SetLobbyData(LobbyId, HostAddressKey,
                 SteamUser.GetSteamID().ToString());
+            SteamMatchmaking.SetLobbyData(LobbyId, "name", SteamFriends.GetPersonaName());
         }
-
-        private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t callback) =>
-            SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
-
+        
         private void OnLobbyEntered(LobbyEnter_t callback)
         {
+            CurrentLobbyId = callback.m_ulSteamIDLobby;
             if(NetworkServer.active) return;
-            var hostAddress = SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey);
-            _networkManager.networkAddress = hostAddress;
+            _networkManager.networkAddress = 
+                SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey);
             _networkManager.StartClient();
             _menuPanel.SetActive(false);
             _lobbyPanel.SetActive(true);
-            //_startGameBtn.interactable = NetworkServer.activeHost;
         }
-
-
+        
+        private void OnLobbyLeave(LobbyKicked_t callback) => LeaveLobby();
+        
     }
 }

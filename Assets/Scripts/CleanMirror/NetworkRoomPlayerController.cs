@@ -52,13 +52,6 @@ namespace CleanMirror
         public override void OnStartClient()
         {
             Room.RoomPlayers.Add(this);
-            Debug.Log($"{Room.RoomPlayers.Count}");
-            var log = "";
-            foreach (var player  in Room.RoomPlayers)
-            {
-                log += player._displayName + "|" + player._isReady + "\n";
-            }
-            Debug.Log(log);
             UpdateDisplay();
         }
 

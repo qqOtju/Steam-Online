@@ -6,9 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Clean Mirror/CleanMirror.unity
-    guid: 0e9db9ad85704c34da2168b926d0a5cf
+    path: Assets/Scenes/SampleScene.unity
+    guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
-    path: Assets/Scenes/Clean Mirror/SceneMap_01.unity
-    guid: 95d6846d8af1f814c95b1e054664ae9f
+    path: Assets/Scenes/Scene_Map_01.unity
+    guid: 5d03af2060fb9904295aba8b4cb9b075
   m_configObjects: {}
