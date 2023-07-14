@@ -3,42 +3,46 @@ using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Steam
+namespace Steam.Player
 {
     [RequireComponent(typeof(Rigidbody))]
     public class GamePlayerController : NetworkBehaviour
     {
         [SerializeField] private float _movementSpeed = 4f;
+        [SerializeField] private float _jumpHeight = 2f;
+        [SerializeField] private Transform _cameraTarget;
+        [SerializeField] private GameObject _meshContainer;
+        [SerializeField] private float _rotationSmoothTime = 0.1f;
+        [SerializeField] private AnimationCurve _movementCurve;
 
-        private Rigidbody _rb;
+        private PlayerMovement _movement;
         private Controls _controls;
+        private Rigidbody _rb;
         private Vector2 _input;
-        private bool _enabled;
         
-        private void Awake()
-        {
-            DontDestroyOnLoad(gameObject);
-            _controls = new();
-        }
-
-        private void Start()
-        {
-            _rb = GetComponent<Rigidbody>();
-        }
-
         public override void OnStartAuthority()
         {
-            _enabled = true;
+            enabled = true;
             _controls.Player.Move.performed += SetMovement;
             _controls.Player.Move.canceled += ResetMovement;
+            _controls.Player.Jump.performed += Jump;
         }
 
- 
         public override void OnStopAuthority()
         {
             base.OnStopAuthority();
             _controls.Player.Move.performed -= SetMovement;
             _controls.Player.Move.canceled -= ResetMovement;
+        }
+
+        [ClientCallback]
+        private void Awake()
+        {
+            DontDestroyOnLoad(gameObject);
+            _rb = GetComponent<Rigidbody>();
+            _controls = new();
+            _movement = new(_rb, _cameraTarget.gameObject, 
+                _meshContainer, _rotationSmoothTime, _movementCurve);
         }
 
         [ClientCallback]
@@ -51,15 +55,21 @@ namespace Steam
         private void Update() => Move();
 
         [Client]
-        private void SetMovement(InputAction.CallbackContext context) => _input = context.ReadValue<Vector2>();
+        private void SetMovement(InputAction.CallbackContext context) => 
+            _input = context.ReadValue<Vector2>();
 
         [Client]
-        private void ResetMovement(InputAction.CallbackContext context) => _input = Vector2.zero;
+        private void ResetMovement(InputAction.CallbackContext context) =>
+            _input = Vector2.zero;
 
         [Client]
-        private void Move()
-        {
-            _rb.velocity = _input * _movementSpeed;
-        }
+        private void Move() =>
+            _movement.MoveUpdate(_controls, true, _movementSpeed,
+                _movementSpeed*2, _movementSpeed, _movementSpeed * 2);
+
+        [Client]
+        private void Jump(InputAction.CallbackContext obj) => _movement.Jump(_jumpHeight, true);
+
+
     }
 }

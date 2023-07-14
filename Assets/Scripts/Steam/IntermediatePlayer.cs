@@ -2,6 +2,7 @@
 using MyMirror;
 using Steam.UI;
 using Steamworks;
+using UnityEngine;
 
 namespace Steam
 {
@@ -21,8 +22,8 @@ namespace Steam
                 if (_room != null) return _room;
                 return _room = NetworkManager.singleton as MyNetworkManager;
             }
-        } 
-        
+        }
+
         public override void OnStartAuthority()
         {
             CmdSetPlayerName(SteamFriends.GetPersonaName());
@@ -32,8 +33,10 @@ namespace Steam
         }
         public override void OnStartClient()
         {
+            if(Room.RoomPlayers.Contains(this)) return;
+            Debug.Log("OnStartClient");
             DontDestroyOnLoad(gameObject);
-            Room.GamePlayers.Add(this);
+            Room.RoomPlayers.Add(this);
             UILobbyController.Instance.UpdateLobbyName();
             UILobbyController.Instance.UpdatePlayerList();
         }
@@ -41,7 +44,7 @@ namespace Steam
 
         public override void OnStopClient()
         {
-            Room.GamePlayers.Remove(this);
+            Room.RoomPlayers.Remove(this);
             UILobbyController.Instance.UpdatePlayerList();
         }
 

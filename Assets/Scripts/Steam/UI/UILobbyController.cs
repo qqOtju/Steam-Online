@@ -64,21 +64,21 @@ namespace Steam.UI
         public void UpdatePlayerList()
         {
             if(!playerIfnoCreated) CreateHostPlayerItem();
-            if(_playerInfos.Count < _networkManager.GamePlayers.Count) CreateClientPlayerItem();
-            if(_playerInfos.Count > _networkManager.GamePlayers.Count) RemovePlayerItem();
-            if(_playerInfos.Count > 0 && _playerInfos.Count == _networkManager.GamePlayers.Count) UpdatePlayerItem();
+            if(_playerInfos.Count < _networkManager.RoomPlayers.Count) CreateClientPlayerItem();
+            if(_playerInfos.Count > _networkManager.RoomPlayers.Count) RemovePlayerItem();
+            if(_playerInfos.Count > 0 && _playerInfos.Count == _networkManager.RoomPlayers.Count) UpdatePlayerItem();
          }
         
         private void CreateHostPlayerItem()
         {
-            foreach (var player in _networkManager.GamePlayers)
+            foreach (var player in _networkManager.RoomPlayers)
             {
                 var newPlayerItem = Instantiate(_playerInfoPrefab,_layout.gameObject.transform);
                 newPlayerItem.playerName = player.playerName;
                 newPlayerItem.connectionId = player.connectionId;
                 newPlayerItem.playerSteamId = player.playerSteamId;
                 newPlayerItem.ready = player.readyStatus;
-                newPlayerItem.Init();
+                newPlayerItem.Init(); 
                 _layout.Align(true);
                 _playerInfos.Add(newPlayerItem);
             }
@@ -87,7 +87,7 @@ namespace Steam.UI
 
         private void CreateClientPlayerItem()
         {
-            foreach (var player in _networkManager.GamePlayers)
+            foreach (var player in _networkManager.RoomPlayers)
             {
                 if (_playerInfos.Any(newPlayer => newPlayer.connectionId == player.connectionId)) continue;
                 var newPlayerItem = Instantiate(_playerInfoPrefab, _layout.gameObject.transform);
@@ -103,7 +103,7 @@ namespace Steam.UI
 
         private void UpdatePlayerItem()
         {
-            foreach (var player in _networkManager.GamePlayers)
+            foreach (var player in _networkManager.RoomPlayers)
             foreach (var info in _playerInfos)
             {
                 if (info.connectionId != player.connectionId) continue;
@@ -119,7 +119,7 @@ namespace Steam.UI
         private void RemovePlayerItem()
         {
             var playerInfosToRemove = _playerInfos.Where(info =>
-                    _networkManager.GamePlayers.All(player => player.connectionId != info.connectionId)).ToList();
+                    _networkManager.RoomPlayers.All(player => player.connectionId != info.connectionId)).ToList();
             if (playerInfosToRemove.Count <= 0) return;
             foreach (var info in playerInfosToRemove)
             {
@@ -135,7 +135,7 @@ namespace Steam.UI
         private void CheckLobbyReadyStatus()
         {
             var ready = true;
-            foreach (var player in _networkManager.GamePlayers.Where(player => !player.readyStatus))
+            foreach (var player in _networkManager.RoomPlayers.Where(player => !player.readyStatus))
                 ready = false;
 
 
