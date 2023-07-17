@@ -35,30 +35,15 @@ namespace Steam.Player
         /// <summary>
         /// Function that is called in the Update method of the PlayerController
         /// </summary>
-        /// <param name="controls"></param>
-        /// <param name="isGrounded"></param>
-        /// <param name="speed"></param>
-        /// <param name="sprintSpeed"></param>
-        /// <param name="airSpeed"></param>
-        /// <param name="airSprintSpeed"></param>
-        public void MoveUpdate(Controls controls, bool isGrounded, float speed, float sprintSpeed, float airSpeed, float airSprintSpeed)
+        public void MoveUpdate(Vector2 inputValue, float speed, float sprintSpeed, float airSpeed, float airSprintSpeed, bool isGrounded, bool isSprinting)
         {
-            var cntrls = controls.Player;
-            var inputValue = cntrls.Move.ReadValue<Vector2>();
-            Move(inputValue, isGrounded, false, speed, sprintSpeed, airSpeed, airSprintSpeed);
+            Move(inputValue, isGrounded, isSprinting, speed, sprintSpeed, airSpeed, airSprintSpeed);
             RotateModel(inputValue);
         }
 
         /// <summary>
         /// Moves the player based on the input value
         /// </summary>
-        /// <param name="inputValue"></param>
-        /// <param name="isGrounded"></param>
-        /// <param name="isSprinting"></param>
-        /// <param name="speed"></param>
-        /// <param name="sprintSpeed"></param>
-        /// <param name="airSpeed"></param>
-        /// <param name="airSprintSpeed"></param>
         private void Move(Vector2 inputValue, bool isGrounded, bool isSprinting, float speed, float sprintSpeed,
             float airSpeed, float airSprintSpeed)
         {
@@ -85,8 +70,6 @@ namespace Steam.Player
         /// <summary>
         /// Returns the forward direction of the camera
         /// </summary>
-        /// <param name="target"></param>
-        /// <returns></returns>
         private Vector3 GetCameraForward(Transform target)
         {
             var forward = target.forward;
@@ -97,8 +80,6 @@ namespace Steam.Player
         /// <summary>
         /// Returns the right direction of the camera
         /// </summary>
-        /// <param name="target"></param>
-        /// <returns></returns>
         private Vector3 GetCameraRight(Transform target)
         {
             var right = target.right;
@@ -109,7 +90,6 @@ namespace Steam.Player
         /// <summary>
         /// Smoothly rotates the model to face the direction of movement
         /// </summary>
-        /// <param name="inputValue"></param>
         private void RotateModel(Vector2 inputValue)
         {
             if(inputValue == Vector2.zero) return;

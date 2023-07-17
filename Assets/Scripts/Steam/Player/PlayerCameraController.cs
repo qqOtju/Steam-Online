@@ -1,6 +1,8 @@
-﻿using Cinemachine;
+﻿using System;
+using Cinemachine;
 using InputSystem;
 using Mirror;
+using UnityAtoms.BaseAtoms;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,21 +12,27 @@ namespace Steam.Player
     {
         [Header("Camera values")] 
         [SerializeField] private Vector2 _clamp;
-        [SerializeField] private float _mouseSensitivity;
-        [Header("Ref")]
+        [SerializeField] private FloatVariable _mouseSensitivity;
+        [Header("References")]
         [SerializeField] private CinemachineVirtualCamera _virtualCamera;
         [SerializeField] private Transform _cameraTarget;
 
         private float _cameraTargetPitch, _cameraTargetYaw;
-        private CinemachineTransposer _transposer;
         private Controls _controls;
+        private Vector2 _input;
         
         public override void OnStartAuthority()
         {
-            _transposer = _virtualCamera.GetCinemachineComponent<CinemachineTransposer>();
             _virtualCamera.gameObject.SetActive(true);
             enabled = true;
             _controls.Player.Look.performed += OnLookPerformed;
+            _controls.Player.Look.canceled += OnLookPerformed;
+        }
+
+        public override void OnStopAuthority()
+        {
+            _controls.Player.Look.performed -= OnLookPerformed;
+            _controls.Player.Look.canceled -= OnLookPerformed;
         }
 
         [ClientCallback]
@@ -39,23 +47,20 @@ namespace Steam.Player
         [ClientCallback]
         private void OnDisable() => _controls.Disable();
 
-        private void OnLookPerformed(InputAction.CallbackContext obj) => Rotate(obj.ReadValue<Vector2>());
+        [ClientCallback]
+        private void LateUpdate() => Rotate(_input);
+
+        private void OnLookPerformed(InputAction.CallbackContext obj) => _input = obj.ReadValue<Vector2>();
 
         private void Rotate(Vector2 lookAxis)
         {
-            
             var deltaTimeMultiplier = 1.0f;
-            _cameraTargetYaw += lookAxis.x * deltaTimeMultiplier * _mouseSensitivity;
-            _cameraTargetPitch += lookAxis.y * deltaTimeMultiplier * _mouseSensitivity;
+            _cameraTargetYaw += lookAxis.x * deltaTimeMultiplier * _mouseSensitivity.Value;
+            _cameraTargetPitch += lookAxis.y * deltaTimeMultiplier * _mouseSensitivity.Value;
             _cameraTargetYaw = ClampAngle(_cameraTargetYaw, float.MinValue, float.MaxValue);
             _cameraTargetPitch = ClampAngle(_cameraTargetPitch, _clamp.x, _clamp.y);
             _cameraTarget.rotation = Quaternion.Euler(_cameraTargetPitch,
                 _cameraTargetYaw, 0);
-            
-            /*var deltaTime = Time.deltaTime;
-            _transposer.m_FollowOffset.y = Mathf.Clamp(_transposer.m_FollowOffset.y - (lookAxis.y * deltaTime),
-                _maxFollowOffset.x, _maxFollowOffset.y);
-            _cameraTargetTransform.Rotate(0,lookAxis.x * deltaTime, 0);*/
         }        
         
         private float ClampAngle(float lfAngle, float lfMin, float lfMax)
