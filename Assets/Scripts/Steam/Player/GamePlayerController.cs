@@ -1,21 +1,25 @@
 ﻿using InputSystem;
 using Mirror;
+using Steam.Interface;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Steam.Player
 {
+    [SelectionBase]
     [RequireComponent(typeof(Rigidbody), typeof(Animator))]
-    public class GamePlayerController : NetworkBehaviour
+    public class GamePlayerController : NetworkBehaviour, IHealth
     {
         [Header("Atom constants")]
+        [SerializeField] private FloatConstant _maxHealth;
         [SerializeField] private FloatConstant _speed;
         [SerializeField] private FloatConstant _sprintSpeed;
         [SerializeField] private FloatConstant _airSpeed;
         [SerializeField] private FloatConstant _airSprintSpeed;
         [SerializeField] private FloatConstant _jumpHeight;
         [Header("Atom variables")] 
+        [SerializeField] private FloatVariable _currentHealth;
         [SerializeField] private BoolVariable _isGrounded;
         [SerializeField] private BoolVariable _isSprinting;
         [Header("Variables")]
@@ -32,7 +36,8 @@ namespace Steam.Player
         private readonly int _animGroundedParam = Animator.StringToHash("Grounded");
         private readonly int _animSpeedParam = Animator.StringToHash("Speed");
 
-        private PlayerMovement _movement;
+        private PlayerMovementController _movement;
+        private PlayerHealthController _health;
         private Transform _transform;
         private Animator _animator;
         private Controls _controls;
@@ -58,6 +63,8 @@ namespace Steam.Player
             _controls.Player.Sprint.canceled -= SprintChange;
         }
 
+        #region ClientCallback
+        
         [ClientCallback]
         private void Awake()
         {
@@ -73,6 +80,9 @@ namespace Steam.Player
             _animator = GetComponent<Animator>();
             _movement = new(_rb, _cameraTarget.gameObject, 
                 _meshContainer, _rotationSmoothTime, _movementCurve);
+            _health = new(_maxHealth.Value);
+            _currentHealth.Value = _maxHealth.Value;
+            _health.OnDeath += () => _controls.Disable();
         }
 
         [ClientCallback]
@@ -96,6 +106,10 @@ namespace Steam.Player
             _animator.SetFloat(_animSpeedParam, _rb.velocity.magnitude);
         }
 
+        #endregion
+
+        #region Client
+
         [Client]
         private void SetMovement(InputAction.CallbackContext context) => 
             _input = context.ReadValue<Vector2>();
@@ -117,8 +131,9 @@ namespace Steam.Player
         private void Move() =>
             _movement.MoveUpdate(_input, _speed.Value,
                 _sprintSpeed.Value * 2, _airSpeed.Value, _airSprintSpeed.Value * 2, _isGrounded.Value,  _isSprinting.Value);
-
-
+        
+        #endregion
+        
         #region GroundCheck
 
         [Client]
@@ -134,20 +149,28 @@ namespace Steam.Player
             return true;
         }
 
-        private void OnDrawGizmosSelected()
+        private void OnDrawGizmos()
         {
+            
             Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
             Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
 
             Gizmos.color = _isGrounded.Value ? transparentGreen : transparentRed;
 
-            var position = _transform.position;
+            var position = transform.position;
             Gizmos.DrawSphere(
                 new Vector3(position.x, position.y - _groundedOffset, position.z),
                 _groundedRadius);
         }
 
         #endregion
+        
+        #region Health
 
+        public void GetDamage(float dmg) => _currentHealth.Value = _health.GetDamage(dmg);
+
+        public void GetHeal(float heal) => _currentHealth.Value = _health.GetHeal(heal);
+
+        #endregion
     }
 }

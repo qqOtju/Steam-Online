@@ -1,6 +1,8 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Steam.UI
 {
@@ -10,7 +12,9 @@ namespace Steam.UI
         [SerializeField] private TMP_InputField _mouseSensitivityInputField;
         [Header("Vars")]
         [SerializeField] private FloatVariable _mouseSensitivity;
+        
         private const string Sensitivity = "sensitivity";
+        
         private void Awake()
         {
             var sensitivity = PlayerPrefs.GetFloat(Sensitivity);
@@ -28,9 +32,9 @@ namespace Steam.UI
         {
             _mouseSensitivityInputField.text = _mouseSensitivity.Value.ToString();
         }
-
+        
         public void ExitGame() => Application.Quit();
 
-        public void Toggle(GameObject obj) => obj.SetActive(!obj.activeSelf); 
+        public void Toggle(GameObject obj) => obj.SetActive(!obj.activeSelf);
     }
 }

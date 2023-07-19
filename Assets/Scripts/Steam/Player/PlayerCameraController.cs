@@ -1,5 +1,4 @@
-﻿using System;
-using Cinemachine;
+﻿using Cinemachine;
 using InputSystem;
 using Mirror;
 using UnityAtoms.BaseAtoms;
@@ -8,6 +7,7 @@ using UnityEngine.InputSystem;
 
 namespace Steam.Player
 {
+    
     public class PlayerCameraController : NetworkBehaviour
     {
         [Header("Camera values")] 
@@ -23,8 +23,8 @@ namespace Steam.Player
         
         public override void OnStartAuthority()
         {
-            _virtualCamera.gameObject.SetActive(true);
             enabled = true;
+            _virtualCamera.gameObject.SetActive(true);
             _controls.Player.Look.performed += OnLookPerformed;
             _controls.Player.Look.canceled += OnLookPerformed;
         }

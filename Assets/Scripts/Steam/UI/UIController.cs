@@ -1,5 +1,4 @@
-﻿using System;
-using InputSystem;
+﻿using InputSystem;
 using TMPro;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;
@@ -18,32 +17,40 @@ namespace Steam.UI
         [Header("Settings")] 
         [SerializeField] private GameObject _settingsPanel;
 
-        private Controls _controls;
         private UIPlayerStatus _playerStatus;
+        private bool _cursorState;
+        private Controls _controls;
 
         #region Mono
         
         private void Awake()
         {
             _controls = new Controls();
+            _cursorState = true;
+            SetCursorState(_cursorState);
             _controls.Player.Escape.performed += OnEscapePerformed;
             _playerStatus = new(_groundedChange, 
                 _sprintChange, _groundedStatusText, _sprintStatusText);
         }
-
-        private void OnEnable() => _controls.Enable();
-        
-        private void OnDisable() => _controls.Disable();
-
         private void OnDestroy()
         {
             _controls.Player.Escape.performed -= OnEscapePerformed;
             _playerStatus.OnDestroy();
         }
+        private void OnEnable() => _controls.Enable();
         
+        private void OnDisable() => _controls.Disable();
+
         #endregion
 
-        private void OnEscapePerformed(InputAction.CallbackContext obj) => 
+        private void OnEscapePerformed(InputAction.CallbackContext obj)
+        { 
             _settingsPanel.SetActive(!_settingsPanel.activeSelf);
+            _cursorState = !_cursorState;
+            SetCursorState(_cursorState);
+        }
+        
+        private void SetCursorState(bool newState) =>
+            Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
     }
 }

@@ -1,9 +1,8 @@
-﻿using InputSystem;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Steam.Player
 {
-    public class PlayerMovement
+    public class PlayerMovementController
     {
         private readonly AnimationCurve _movementCurve;
         private readonly Transform _targetTransform;
@@ -14,7 +13,7 @@ namespace Steam.Player
         private float _rotationVelocity;
         private float _movementValue;
         
-        public PlayerMovement(Rigidbody rb ,GameObject cameraTarget, 
+        public PlayerMovementController(Rigidbody rb ,GameObject cameraTarget, 
             GameObject meshContainer, float rotationSmoothTime, AnimationCurve movementCurve)
         {
             _rb = rb;
