@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Mirror;
 using Steam;
 using Steam.Player;
+using Steam.UI;
 using Steamworks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -13,7 +14,8 @@ namespace MyMirror
     {
         [SerializeField] private LobbyPlayerController _lobbyPlayerPrefab;
         [SerializeField] private GamePlayerController _gamePlayerPrefab;
-        [Scene] [SerializeField] private string _menuScene = null;
+        [SerializeField] private UILobbyController _lobbyController;
+        [SerializeField] [Scene] private string _menuScene = null;
         public List<LobbyPlayerController> LobbyPlayers { get; } = new();
         public List<GamePlayerController> GamePlayers { get; } = new();
         public event Action<NetworkConnectionToClient> OnSceneChange;
@@ -27,9 +29,8 @@ namespace MyMirror
         {
             if(SceneManager.GetActiveScene().name != _menuScene.SceneName()) return;
             var gamePlayer = Instantiate(_lobbyPlayerPrefab);
-            gamePlayer.connectionId = conn.connectionId;
-            gamePlayer.playerIdNumber = numPlayers;
-            gamePlayer.playerSteamId = SteamMatchmaking.GetLobbyMemberByIndex(SteamLobby.LobbyId, numPlayers).m_SteamID;
+            gamePlayer.Init(conn.connectionId, numPlayers, 
+                SteamMatchmaking.GetLobbyMemberByIndex(SteamLobby.LobbyId, numPlayers).m_SteamID, _lobbyController);
             NetworkServer.AddPlayerForConnection(conn, gamePlayer.gameObject);
         }
 

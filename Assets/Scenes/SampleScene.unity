@@ -1050,6 +1050,7 @@ MonoBehaviour:
     type: 3}
   _gamePlayerPrefab: {fileID: 7254720671825597199, guid: eee0c58cb32d96c4f82bdf285ef2fd6e,
     type: 3}
+  _lobbyController: {fileID: 549792302}
   _menuScene: Assets/Scenes/SampleScene.unity
 --- !u!1 &511046587
 GameObject:

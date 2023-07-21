@@ -15,39 +15,55 @@ namespace Steam.UI
         [SerializeField] private Color _readyColor;
         [SerializeField] private Color _notReadyColor;
         
-        [HideInInspector] public string playerName;
-        [HideInInspector] public int connectionId;
-        [HideInInspector] public ulong playerSteamId;
-        [HideInInspector] public bool avatarReceived = false;
-        [HideInInspector] public bool ready;
+        private string _playerName;
+        private int _connectionId;
+        private ulong _playerSteamId;
+        private bool _avatarReceived = false;
+        private bool _ready;
+
+        public int ConnectionId => _connectionId;
         
         private void Start()
         {
             Callback<AvatarImageLoaded_t>.Create(OnAvatarImageLoaded);
         }
-       
-        public void Init()
+
+        public void Init(string playerName, int connId, ulong steamId, bool ready)
         {
-            _displayNicknameText.text = playerName;
+            _playerName = playerName;
+            _connectionId = connId;
+            _playerSteamId = steamId;
+            _ready = ready;
+        }
+
+        public void Init(string playerName, bool ready)
+        {
+            _playerName = playerName;
+            _ready = ready;
+        }
+        
+        public void UpdateInfo()
+        {
+            _displayNicknameText.text = _playerName;
             ChangePlayerStatus();
-            if(!avatarReceived) GetPlayerIcon();
+            if(!_avatarReceived) GetPlayerIcon();
         }
 
         private void ChangePlayerStatus() => 
-            _displayStatusImage.color = ready ? _readyColor : _notReadyColor;
+            _displayStatusImage.color = _ready ? _readyColor : _notReadyColor;
         
         
 
         private void GetPlayerIcon()
         {
-            var imageId = SteamFriends.GetLargeFriendAvatar((CSteamID)playerSteamId);
+            var imageId = SteamFriends.GetLargeFriendAvatar((CSteamID)_playerSteamId);
             if(imageId == -1) return;
             _displayProfileImage.texture = GetSteamImageAsTexture(imageId);
         }
         
         private void OnAvatarImageLoaded(AvatarImageLoaded_t callback)
         {
-            if(callback.m_steamID.m_SteamID != playerSteamId) return;
+            if(callback.m_steamID.m_SteamID != _playerSteamId) return;
             _displayProfileImage.texture = GetSteamImageAsTexture(callback.m_iImage);
         }
         
@@ -66,7 +82,7 @@ namespace Steam.UI
                     texture.Apply();
                 }
             }
-            avatarReceived = true;
+            _avatarReceived = true;
             return texture;
         }
     }

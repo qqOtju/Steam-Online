@@ -9,10 +9,12 @@ namespace Steam
 {
     public class SteamLobby : NetworkBehaviour
     {
-        [Header("Panels")] [SerializeField] private GameObject _menuPanel;
+        [Header("Panels")] 
+        [SerializeField] private GameObject _menuPanel;
         [SerializeField] private GameObject _lobbyPanel;
-        [Header("Other")] [SerializeField] private TextMeshProUGUI _lobbyNameText;
-        [Scene] [SerializeField] private string _menuScene = null;
+        [Header("Other")]
+        [SerializeField] private TextMeshProUGUI _lobbyNameText;
+        [SerializeField] [Scene] private string _menuScene = null;
         [SerializeField] private MyNetworkManager _networkManager;
         public static CSteamID LobbyId { get; private set; }
         public static ulong CurrentLobbyId { get; private set; }
@@ -27,7 +29,7 @@ namespace Steam
                 _lobbyNameText.text = "Steam is not initialized";
                 return;
             }
-
+            
             Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
             Callback<LobbyCreated_t>.Create(OnLobbyCreated);
             Callback<LobbyEnter_t>.Create(OnLobbyEntered);
@@ -61,8 +63,6 @@ namespace Steam
         }
 
         #endregion
-
-
 
         #region Callbacks
 
