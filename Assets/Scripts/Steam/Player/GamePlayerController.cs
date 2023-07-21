@@ -34,6 +34,7 @@ namespace Steam.Player
         [SerializeField] private AnimationCurve _movementCurve;
 
         private readonly int _animGroundedParam = Animator.StringToHash("Grounded");
+        private readonly int _animPunchParam = Animator.StringToHash("Punch");
         private readonly int _animSpeedParam = Animator.StringToHash("Speed");
 
         private PlayerMovementController _movement;
@@ -52,6 +53,9 @@ namespace Steam.Player
             _controls.Player.Jump.performed += Jump;
             _controls.Player.Sprint.performed += SprintChange;
             _controls.Player.Sprint.canceled += SprintChange;
+            _controls.Player.Punch.performed += Punch;
+            _health = new(_maxHealth.Value);
+            _currentHealth.Value = _maxHealth.Value;
         }
 
         public override void OnStopAuthority()
@@ -80,9 +84,7 @@ namespace Steam.Player
             _animator = GetComponent<Animator>();
             _movement = new(_rb, _cameraTarget.gameObject, 
                 _meshContainer, _rotationSmoothTime, _movementCurve);
-            _health = new(_maxHealth.Value);
-            _currentHealth.Value = _maxHealth.Value;
-            _health.OnDeath += () => _controls.Disable();
+            _health.OnDeath += HandleDeath;
         }
 
         [ClientCallback]
@@ -126,12 +128,20 @@ namespace Steam.Player
         private void SprintChange(InputAction.CallbackContext obj) =>
             _isSprinting.Value = _controls.Player.Sprint.inProgress;
         
-
+        [Client]
+        private void Punch(InputAction.CallbackContext obj)
+        {
+            _animator.SetBool(_animPunchParam, true);
+            Physics.Raycast(_transform.position, _transform.forward, out var hit);
+            if(!hit.collider.TryGetComponent<GamePlayerController>(out var player)) return;
+            
+        }
+        
         [Client]
         private void Move() =>
             _movement.MoveUpdate(_input, _speed.Value,
                 _sprintSpeed.Value * 2, _airSpeed.Value, _airSprintSpeed.Value * 2, _isGrounded.Value,  _isSprinting.Value);
-        
+
         #endregion
         
         #region GroundCheck
@@ -167,9 +177,15 @@ namespace Steam.Player
         
         #region Health
 
+        [Server]
         public void GetDamage(float dmg) => _currentHealth.Value = _health.GetDamage(dmg);
 
+        [Server]
         public void GetHeal(float heal) => _currentHealth.Value = _health.GetHeal(heal);
+
+        [ClientRpc]
+        private void HandleDeath() =>
+            _controls.Disable();
 
         #endregion
     }

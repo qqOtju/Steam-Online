@@ -3,6 +3,7 @@ using System.Linq;
 using GridLayout;
 using Mirror;
 using MyMirror;
+using Steam.Player;
 using Steamworks;
 using TMPro;
 using UnityEngine;
@@ -12,66 +13,54 @@ namespace Steam.UI
 {
     public class UILobbyController : NetworkBehaviour
     {
+        [Header("Lobby main")]
         [SerializeField] private TextMeshProUGUI _lobbyNameText;
         [SerializeField] private UIPlayerInfo _playerInfoPrefab;
+        [Tooltip("Players info container")]
         [SerializeField] private AbstractGridLayout _layout;
         [SerializeField] private MyNetworkManager _networkManager;
+        [Header("Buttons")]
         [SerializeField] private Button _startGameBtn;
+        [SerializeField] private TextMeshProUGUI _startButtonText;
         [SerializeField] private TextMeshProUGUI _readyBtnText;
         
-        private readonly List<UIPlayerInfo> _playerInfos = new();
-        private MyNetworkManager _room;
-
         public static UILobbyController Instance;
-        public IntermediatePlayer _localIntermediatePlayer;
-        public bool playerIfnoCreated = false;
-        public ulong currentLobbyId;
 
-        private MyNetworkManager Room
-        {
-            get
-            {
-                if (_room != null) return _room;
-                return _room = NetworkManager.singleton as MyNetworkManager;
-            }
-        } 
+        private readonly Color _multiplyColor = new(0.5f, 0.5f, 0.5f, 1f);
+        private LobbyPlayerController _localLobbyPlayerController;
+        private readonly List<UIPlayerInfo> _playerInfos = new();
+        private Color _startBtnBaseColor;
+        private bool _playerInfoCreated;
         
         private void Awake()
         {
+            _startBtnBaseColor = _startButtonText.color;
+            _startButtonText.color = _multiplyColor;
             _startGameBtn.interactable = false;
             if(Instance == null) Instance = this;
         }
 
-        public void ReadyPlayer() => _localIntermediatePlayer.ChangeReady();
+        public void ReadyPlayer() => _localLobbyPlayerController.ChangeReady();
 
-        public void LeaveLobby()
-        {
-            SteamMatchmaking.LeaveLobby(new CSteamID(currentLobbyId));
-            if(isServer) _networkManager.StopHost();
-            else _networkManager.StopClient();
-            SteamLobby.Instance.LeaveLobby();
-        }
-        
         public void UpdateLobbyName()
         {
-            currentLobbyId = SteamLobby.CurrentLobbyId;
-            _lobbyNameText.text = SteamMatchmaking.GetLobbyData(new CSteamID(currentLobbyId), "name");
+            _lobbyNameText.text = $"{SteamMatchmaking.GetLobbyData(SteamLobby.LobbyId, "name")}`s lobby";
         }
         
-        public void FindLocalPlayer() =>
-            _localIntermediatePlayer = GameObject.Find("LocalPlayer").GetComponent<IntermediatePlayer>();
+        public void SetLocalPlayer(LobbyPlayerController localPlayerController) =>
+            _localLobbyPlayerController = localPlayerController;
         
         public void UpdatePlayerList()
         {
-            if(!playerIfnoCreated) CreateHostPlayerItem();
-            if(_playerInfos.Count < _networkManager.RoomPlayers.Count) CreateClientPlayerItem();
-            if(_playerInfos.Count > _networkManager.RoomPlayers.Count) RemovePlayerItem();
-            if(_playerInfos.Count > 0 && _playerInfos.Count == _networkManager.RoomPlayers.Count) UpdatePlayerItem();
+            if(!_playerInfoCreated) CreateHostPlayerItem();
+            if(_playerInfos.Count < _networkManager.LobbyPlayers.Count) CreateClientPlayerItem();
+            if(_playerInfos.Count > _networkManager.LobbyPlayers.Count) RemovePlayerItem();
+            if(_playerInfos.Count > 0 && _playerInfos.Count == _networkManager.LobbyPlayers.Count) UpdatePlayerItem();
          }
         
         private void CreateHostPlayerItem()
         {
-            foreach (var player in _networkManager.RoomPlayers)
+            foreach (var player in _networkManager.LobbyPlayers)
             {
                 var newPlayerItem = Instantiate(_playerInfoPrefab,_layout.gameObject.transform);
                 newPlayerItem.playerName = player.playerName;
@@ -82,12 +71,12 @@ namespace Steam.UI
                 _layout.Align(true);
                 _playerInfos.Add(newPlayerItem);
             }
-            playerIfnoCreated = true;
+            _playerInfoCreated = true;
         }
 
         private void CreateClientPlayerItem()
         {
-            foreach (var player in _networkManager.RoomPlayers)
+            foreach (var player in _networkManager.LobbyPlayers)
             {
                 if (_playerInfos.Any(newPlayer => newPlayer.connectionId == player.connectionId)) continue;
                 var newPlayerItem = Instantiate(_playerInfoPrefab, _layout.gameObject.transform);
@@ -103,14 +92,14 @@ namespace Steam.UI
 
         private void UpdatePlayerItem()
         {
-            foreach (var player in _networkManager.RoomPlayers)
+            foreach (var player in _networkManager.LobbyPlayers)
             foreach (var info in _playerInfos)
             {
                 if (info.connectionId != player.connectionId) continue;
                 info.playerName = player.playerName;
                 info.ready = player.readyStatus;
                 info.Init();
-                if (player == _localIntermediatePlayer)
+                if (player == _localLobbyPlayerController)
                     UpdateBtn();
             }
             CheckLobbyReadyStatus();
@@ -119,7 +108,7 @@ namespace Steam.UI
         private void RemovePlayerItem()
         {
             var playerInfosToRemove = _playerInfos.Where(info =>
-                    _networkManager.RoomPlayers.All(player => player.connectionId != info.connectionId)).ToList();
+                    _networkManager.LobbyPlayers.All(player => player.connectionId != info.connectionId)).ToList();
             if (playerInfosToRemove.Count <= 0) return;
             foreach (var info in playerInfosToRemove)
             {
@@ -130,19 +119,25 @@ namespace Steam.UI
         }
 
         private void UpdateBtn() =>
-            _readyBtnText.text = _localIntermediatePlayer.readyStatus ? "<color=red>Not ready</color>" : "<color=green>Ready</color>";
+            _readyBtnText.text = _localLobbyPlayerController.readyStatus ? "<color=red>Not ready</color>" : "<color=green>Ready</color>";
 
         private void CheckLobbyReadyStatus()
         {
             var ready = true;
-            foreach (var player in _networkManager.RoomPlayers.Where(player => !player.readyStatus))
+            foreach (var player in _networkManager.LobbyPlayers.Where(player => !player.readyStatus))
                 ready = false;
 
 
             if (ready)
-                _startGameBtn.interactable = (_localIntermediatePlayer.playerIdNumber == 0);
+            {
+                _startButtonText.color = _startBtnBaseColor;
+                _startGameBtn.interactable = _localLobbyPlayerController.playerIdNumber == 0;
+            }
             else
+            {
+                _startButtonText.color = _multiplyColor;
                 _startGameBtn.interactable = false;
+            }
         }
     }
 }

@@ -4,9 +4,10 @@ namespace Steam.Player
 {
     public class PlayerHealthController
     {
+        public event Action OnDeath;
+        
         private readonly float _maxHealth;
         private float _currentHealth;
-        public event Action OnDeath;
         
         public PlayerHealthController(float maxHealth)
         {

@@ -1,8 +1,10 @@
-﻿using InputSystem;
+﻿using System;
+using InputSystem;
 using TMPro;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace Steam.UI
 {
@@ -16,6 +18,12 @@ namespace Steam.UI
         [SerializeField] private TextMeshProUGUI _sprintStatusText;
         [Header("Settings")] 
         [SerializeField] private GameObject _settingsPanel;
+        [Header("HealthBar")]
+        [SerializeField] private Image _healthBar;
+        [SerializeField] private TextMeshProUGUI _healthText;
+        [SerializeField] private FloatEvent _onHealthChange;
+        [SerializeField] private FloatConstant _maxHealth;
+        
 
         private UIPlayerStatus _playerStatus;
         private bool _cursorState;
@@ -27,6 +35,7 @@ namespace Steam.UI
         {
             _controls = new Controls();
             _cursorState = true;
+            _onHealthChange.Register(UpdateHealthBar);
             SetCursorState(_cursorState);
             _controls.Player.Escape.performed += OnEscapePerformed;
             _playerStatus = new(_groundedChange, 
@@ -52,5 +61,11 @@ namespace Steam.UI
         
         private void SetCursorState(bool newState) =>
             Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
+        
+        private void UpdateHealthBar(float newValue)
+        {
+            _healthBar.fillAmount = newValue / _maxHealth.Value;
+            _healthText.text = $"{Math.Round(newValue, 2)}/{_maxHealth.Value}";
+        }
     }
 }

@@ -56,7 +56,7 @@ MonoBehaviour:
   syncInterval: 0
   _laserDamage: {fileID: 11400000, guid: c4e56bba3f4517d4ca9d072b1b7d34b0, type: 2}
   _startPoint: {fileID: 5409527024961048672}
-  _timeBeforeDamage: 0.1
+  _timeBeforeDamage: 0.5
 --- !u!120 &5409527024821185112
 LineRenderer:
   m_ObjectHideFlags: 0

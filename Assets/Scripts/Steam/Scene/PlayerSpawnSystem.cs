@@ -28,7 +28,7 @@ namespace Steam.Scene
         [Server]
         private void SpawnPlayers(NetworkConnection conn)
         {
-            var players = Manager.GamePLayers;
+            var players = Manager.GamePlayers;
             for (int i = 0; i < players.Count; i++)
             {
                 players[i].transform.position = _spawnPoint[i].position;

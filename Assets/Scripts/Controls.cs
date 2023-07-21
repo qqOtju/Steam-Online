@@ -73,6 +73,15 @@ namespace InputSystem
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Punch"",
+                    ""type"": ""Button"",
+                    ""id"": ""7240efc5-96a1-404d-8b2a-cc81ae90eb39"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -174,6 +183,17 @@ namespace InputSystem
                     ""action"": ""Escape"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c9269d92-e30f-437f-814f-fbef1e2992b8"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Punch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -187,6 +207,7 @@ namespace InputSystem
             m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
             m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
             m_Player_Escape = m_Player.FindAction("Escape", throwIfNotFound: true);
+            m_Player_Punch = m_Player.FindAction("Punch", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -253,6 +274,7 @@ namespace InputSystem
         private readonly InputAction m_Player_Jump;
         private readonly InputAction m_Player_Sprint;
         private readonly InputAction m_Player_Escape;
+        private readonly InputAction m_Player_Punch;
         public struct PlayerActions
         {
             private @Controls m_Wrapper;
@@ -262,6 +284,7 @@ namespace InputSystem
             public InputAction @Jump => m_Wrapper.m_Player_Jump;
             public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
             public InputAction @Escape => m_Wrapper.m_Player_Escape;
+            public InputAction @Punch => m_Wrapper.m_Player_Punch;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -286,6 +309,9 @@ namespace InputSystem
                 @Escape.started += instance.OnEscape;
                 @Escape.performed += instance.OnEscape;
                 @Escape.canceled += instance.OnEscape;
+                @Punch.started += instance.OnPunch;
+                @Punch.performed += instance.OnPunch;
+                @Punch.canceled += instance.OnPunch;
             }
 
             private void UnregisterCallbacks(IPlayerActions instance)
@@ -305,6 +331,9 @@ namespace InputSystem
                 @Escape.started -= instance.OnEscape;
                 @Escape.performed -= instance.OnEscape;
                 @Escape.canceled -= instance.OnEscape;
+                @Punch.started -= instance.OnPunch;
+                @Punch.performed -= instance.OnPunch;
+                @Punch.canceled -= instance.OnPunch;
             }
 
             public void RemoveCallbacks(IPlayerActions instance)
@@ -329,6 +358,7 @@ namespace InputSystem
             void OnJump(InputAction.CallbackContext context);
             void OnSprint(InputAction.CallbackContext context);
             void OnEscape(InputAction.CallbackContext context);
+            void OnPunch(InputAction.CallbackContext context);
         }
     }
 }

@@ -11,44 +11,50 @@ namespace MyMirror
 {
     public class MyNetworkManager : NetworkManager
     {
-        [SerializeField] private IntermediatePlayer _intermediatePlayerPrefab;
+        [SerializeField] private LobbyPlayerController _lobbyPlayerPrefab;
         [SerializeField] private GamePlayerController _gamePlayerPrefab;
         [Scene] [SerializeField] private string _menuScene = null;
-        public event Action<CSteamID> OnPlayerConnect;
-        public event Action<NetworkConnectionToClient> OnSceneChange; 
-        public List<IntermediatePlayer> RoomPlayers { get; } = new();
-        public List<GamePlayerController> GamePLayers { get; } = new();
+        public List<LobbyPlayerController> LobbyPlayers { get; } = new();
+        public List<GamePlayerController> GamePlayers { get; } = new();
+        public event Action<NetworkConnectionToClient> OnSceneChange;
 
+        /// <summary>
+        /// Called on server when a client requests to add the player.
+        /// Adds the lobby player.
+        /// </summary>
+        /// <param name="conn">connection of the client</param>
         public override void OnServerAddPlayer(NetworkConnectionToClient conn)
         {
-            Debug.Log("OnServerAddPlayer");
             if(SceneManager.GetActiveScene().name != _menuScene.SceneName()) return;
-            var gamePlayer = Instantiate(_intermediatePlayerPrefab);
+            var gamePlayer = Instantiate(_lobbyPlayerPrefab);
             gamePlayer.connectionId = conn.connectionId;
             gamePlayer.playerIdNumber = numPlayers;
-            var steamId = SteamMatchmaking.GetLobbyMemberByIndex(SteamLobby.LobbyId, numPlayers);
-            gamePlayer.playerSteamId = steamId.m_SteamID;
+            gamePlayer.playerSteamId = SteamMatchmaking.GetLobbyMemberByIndex(SteamLobby.LobbyId, numPlayers).m_SteamID;
             NetworkServer.AddPlayerForConnection(conn, gamePlayer.gameObject);
-            OnPlayerConnect?.Invoke(steamId);
         }
 
+        /// <summary>
+        /// Adds the game player.
+        /// Swaps the connection between the lobby player and the game player.
+        /// </summary>
         public override void ServerChangeScene(string newSceneName)
         {
-            if (SceneManager.GetActiveScene().name == _menuScene.SceneName() && newSceneName.StartsWith("Scene_Map"))
+            if (SceneManager.GetActiveScene().name != _menuScene.SceneName() &&
+                !newSceneName.StartsWith("Scene_Map")) return;
+            for (int i = LobbyPlayers.Count - 1; i >= 0; i--)
             {
-                for (int i = RoomPlayers.Count - 1; i >= 0; i--)
-                {
-                    var conn = RoomPlayers[i].connectionToClient;
-                    var gamePlayerInstance = Instantiate(_gamePlayerPrefab);
-                    NetworkServer.Destroy(conn.identity.gameObject);
-                    gamePlayerInstance.gameObject.SetActive(false);
-                    NetworkServer.ReplacePlayerForConnection(conn, gamePlayerInstance.gameObject);
-                    GamePLayers.Add(gamePlayerInstance);
-                }
+                var conn = LobbyPlayers[i].connectionToClient;
+                var gamePlayerInstance = Instantiate(_gamePlayerPrefab);
+                NetworkServer.Destroy(conn.identity.gameObject);
+                gamePlayerInstance.gameObject.SetActive(false);
+                NetworkServer.ReplacePlayerForConnection(conn, gamePlayerInstance.gameObject);
+                GamePlayers.Add(gamePlayerInstance);
             }
+
             base.ServerChangeScene(newSceneName);
         }
 
+        /// <summary>Called on the server when a client is ready (= loaded the scene)</summary>
         public override void OnServerReady(NetworkConnectionToClient conn)
         {
             base.OnServerReady(conn);

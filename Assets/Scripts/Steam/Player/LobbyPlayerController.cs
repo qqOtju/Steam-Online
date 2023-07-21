@@ -4,53 +4,61 @@ using Steam.UI;
 using Steamworks;
 using UnityEngine;
 
-namespace Steam
+namespace Steam.Player
 {
-    public class IntermediatePlayer : NetworkBehaviour
+    public class LobbyPlayerController : NetworkBehaviour
     {
-        [SyncVar] public int connectionId;
-        [SyncVar] public int playerIdNumber;
-        [SyncVar] public ulong playerSteamId;
+        [HideInInspector] 
         [SyncVar(hook = nameof(PlayerNameUpdate))] public string playerName;
+        [HideInInspector]
         [SyncVar(hook = nameof(PlayerReadyUpdate))] public bool readyStatus;
+        [HideInInspector] 
+        [SyncVar] public ulong playerSteamId;
+        [HideInInspector] 
+        [SyncVar] public int playerIdNumber;
+        [HideInInspector] 
+        [SyncVar] public int connectionId;
         
-        private MyNetworkManager _room;
-        private MyNetworkManager Room
+        private MyNetworkManager _lobby;
+        private MyNetworkManager Lobby
         {
             get
             {
-                if (_room != null) return _room;
-                return _room = NetworkManager.singleton as MyNetworkManager;
+                if (_lobby != null) return _lobby;
+                return _lobby = NetworkManager.singleton as MyNetworkManager;
             }
         }
 
+        /// <summary>
+        /// Like Start(), but only called for objects the client has authority over.
+        /// Means called only on the local player.
+        /// </summary>
         public override void OnStartAuthority()
         {
             CmdSetPlayerName(SteamFriends.GetPersonaName());
-            gameObject.name = "LocalPlayer";
-            UILobbyController.Instance.FindLocalPlayer();
+            UILobbyController.Instance.SetLocalPlayer(this);
             UILobbyController.Instance.UpdateLobbyName();
         }
+        
+        
         public override void OnStartClient()
         {
-            if(Room.RoomPlayers.Contains(this)) return;
-            Debug.Log("OnStartClient");
+            if(Lobby.LobbyPlayers.Contains(this)) return;
             DontDestroyOnLoad(gameObject);
-            Room.RoomPlayers.Add(this);
+            Lobby.LobbyPlayers.Add(this);
             UILobbyController.Instance.UpdateLobbyName();
             UILobbyController.Instance.UpdatePlayerList();
         }
 
-
         public override void OnStopClient()
         {
-            Room.RoomPlayers.Remove(this);
+            Lobby.LobbyPlayers.Remove(this);
             UILobbyController.Instance.UpdatePlayerList();
         }
 
         private void PlayerNameUpdate(string oldValue, string newValue)
         {
-            if (isServer) this.playerName = newValue;
+            if (isServer) playerName = newValue;
             if (isClient) UILobbyController.Instance.UpdatePlayerList();
         }
 
@@ -66,12 +74,12 @@ namespace Steam
         }
         
         [Command]
-        private void CmdSetPlayerName(string playerName) 
-            => this.PlayerNameUpdate(this.playerName, playerName);
+        private void CmdSetPlayerName(string newName) 
+            => PlayerNameUpdate(playerName, newName);
 
         [Command]
         private void CmdSetPlayerReady() 
-            => this.PlayerReadyUpdate(this.readyStatus, !this.readyStatus);
+            => PlayerReadyUpdate(readyStatus, !readyStatus);
         
     }
 }
