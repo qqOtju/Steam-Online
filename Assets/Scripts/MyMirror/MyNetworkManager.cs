@@ -16,10 +16,12 @@ namespace MyMirror
         [SerializeField] private GamePlayerController _gamePlayerPrefab;
         [SerializeField] private UILobbyController _lobbyController;
         [SerializeField] [Scene] private string _menuScene = null;
+        [SerializeField] private bool _withoutSteam;
         public List<LobbyPlayerController> LobbyPlayers { get; } = new();
         public List<GamePlayerController> GamePlayers { get; } = new();
         public event Action<NetworkConnectionToClient> OnSceneChange;
-
+        public UILobbyController LobbyController => _lobbyController;
+        
         /// <summary>
         /// Called on server when a client requests to add the player.
         /// Adds the lobby player.
@@ -29,8 +31,11 @@ namespace MyMirror
         {
             if(SceneManager.GetActiveScene().name != _menuScene.SceneName()) return;
             var gamePlayer = Instantiate(_lobbyPlayerPrefab);
-            gamePlayer.Init(conn.connectionId, numPlayers, 
-                SteamMatchmaking.GetLobbyMemberByIndex(SteamLobby.LobbyId, numPlayers).m_SteamID, _lobbyController);
+            if(_withoutSteam) 
+                gamePlayer.Init(conn.connectionId, numPlayers, 
+                    0, _lobbyController);
+            else gamePlayer.Init(conn.connectionId, numPlayers, 
+                    SteamMatchmaking.GetLobbyMemberByIndex(SteamLobby.LobbyId, numPlayers).m_SteamID, _lobbyController);
             NetworkServer.AddPlayerForConnection(conn, gamePlayer.gameObject);
         }
 
@@ -51,7 +56,6 @@ namespace MyMirror
                 NetworkServer.ReplacePlayerForConnection(conn, gamePlayerInstance.gameObject);
                 GamePlayers.Add(gamePlayerInstance);
             }
-
             base.ServerChangeScene(newSceneName);
         }
 

@@ -65,6 +65,7 @@ namespace Steam.Player
             _controls.Player.Jump.performed -= Jump;
             _controls.Player.Sprint.performed -= SprintChange;
             _controls.Player.Sprint.canceled -= SprintChange;
+            _controls.Player.Punch.performed -= Punch;
         }
 
         #region ClientCallback
@@ -134,7 +135,7 @@ namespace Steam.Player
             _animator.SetBool(_animPunchParam, true);
             Physics.Raycast(_transform.position, _transform.forward, out var hit);
             if(!hit.collider.TryGetComponent<GamePlayerController>(out var player)) return;
-            
+            player.gameObject.GetComponent<Rigidbody>().AddForce(_transform.forward, ForceMode.Impulse);
         }
         
         [Client]

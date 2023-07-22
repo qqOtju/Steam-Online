@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace Steam
 {
-    public class SteamLobby : NetworkBehaviour
+    public class SteamLobby : MonoBehaviour
     {
         [Header("Panels")] 
         [SerializeField] private GameObject _menuPanel;
@@ -55,8 +55,9 @@ namespace Steam
         public void LeaveLobby()
         {
             SteamMatchmaking.LeaveLobby(LobbyId);
-            if (isServer) _networkManager.StopHost();
-            else _networkManager.StopClient();
+            _networkManager.StopHost();
+            /*if (isServer) _networkManager.StopHost();
+            else _networkManager.StopClient();*/
             _menuPanel.gameObject.SetActive(true);
             _lobbyPanel.gameObject.SetActive(false);
             gameObject.SetActive(true);

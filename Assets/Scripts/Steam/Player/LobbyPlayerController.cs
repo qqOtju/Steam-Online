@@ -16,13 +16,21 @@ namespace Steam.Player
         [SyncVar] private int _connectionId;
 
         private UILobbyController _lobbyController;
-        private MyNetworkManager _lobby;
-        private MyNetworkManager Lobby
+        private UILobbyController LobbyController
         {
             get
             {
-                if (_lobby != null) return _lobby;
-                return _lobby = NetworkManager.singleton as MyNetworkManager;
+                if (_lobbyController != null) return _lobbyController;
+                return _lobbyController = Network.LobbyController;
+            }
+        }
+        private MyNetworkManager _network;
+        private MyNetworkManager Network
+        {
+            get
+            {
+                if (_network != null) return _network;
+                return _network = NetworkManager.singleton as MyNetworkManager;
             }
         }
 
@@ -39,7 +47,7 @@ namespace Steam.Player
             _playerSteamId = steamId;
             _lobbyController = lobbyController;
         }
-        
+
         #region NetworkCallbacks
 
         /*
@@ -62,8 +70,8 @@ namespace Steam.Player
         public override void OnStartAuthority()
         {
             CmdSetPlayerName(SteamFriends.GetPersonaName());
-            _lobbyController.SetLocalPlayer(this);
-            _lobbyController.UpdateLobbyName();
+            LobbyController.SetLocalPlayer(this);
+            LobbyController.UpdateLobbyName();
         }
 
         /// <summary>
@@ -73,18 +81,18 @@ namespace Steam.Player
         /// </summary>
         public override void OnStartClient()
         {
-            if (Lobby.LobbyPlayers.Contains(this)) return;
+            if (Network.LobbyPlayers.Contains(this)) return;
             //if the new client
             DontDestroyOnLoad(gameObject);
-            Lobby.LobbyPlayers.Add(this);
-            // UILobbyController.Instance.UpdateLobbyName();
-            _lobbyController.UpdatePlayerList();
+            Network.LobbyPlayers.Add(this);
+            LobbyController.UpdateLobbyName();
+            LobbyController.UpdatePlayerList();
         }
 
         public override void OnStopClient()
         {
-            Lobby.LobbyPlayers.Remove(this);
-            _lobbyController.UpdatePlayerList();
+            Network.LobbyPlayers.Remove(this);
+            LobbyController.UpdatePlayerList();
         }
 
         #endregion
@@ -107,14 +115,13 @@ namespace Steam.Player
         private void PlayerNameUpdate(string oldValue, string newValue)
         {
             if (isServer) _playerName = newValue;
-            if (isClient) _lobbyController.UpdatePlayerList();
+            if (isClient) LobbyController.UpdatePlayerList();
         }
 
         private void PlayerReadyUpdate(bool oldValue, bool newValue)
         {
             if (isServer) _readyStatus = newValue;
-            if (isClient) _lobbyController.UpdatePlayerList();
+            if (isClient) LobbyController.UpdatePlayerList();
         }
-
     }
 }
