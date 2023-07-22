@@ -13,24 +13,25 @@ namespace Steam.UI
 {
     public class UILobbyController : NetworkBehaviour
     {
-        [Header("Lobby main")] [SerializeField]
-        private TextMeshProUGUI _lobbyNameText;
-
+        [Header("Lobby main")] 
+        [SerializeField] private TextMeshProUGUI _lobbyNameText;
         [SerializeField] private UIPlayerInfo _playerInfoPrefab;
-
-        [Tooltip("Players info container")] [SerializeField]
-        private AbstractGridLayout _layout;
-
+        [Tooltip("Players info container")] 
+        [SerializeField] private AbstractGridLayout _layout;
         [SerializeField] private MyNetworkManager _networkManager;
-        [Header("Buttons")] [SerializeField] private Button _startGameBtn;
+        [SerializeField] private SteamLobby _steamLobby;
+        [Header("Buttons")] 
+        [SerializeField] private Button _startGameBtn;
         [SerializeField] private TextMeshProUGUI _startButtonText;
         [SerializeField] private TextMeshProUGUI _readyBtnText;
+        [SerializeField] private bool _withoutSteam;
 
-        private Dictionary<LobbyPlayerController, UIPlayerInfo> _players = new();
+        private readonly Dictionary<LobbyPlayerController, UIPlayerInfo> _players = new();
         private readonly Color _multiplyColor = new(0.5f, 0.5f, 0.5f, 1f);
-        private LobbyPlayerController _localLobbyPlayerController;
+        private LobbyPlayerController _localLobbyPlayer;
         private Color _startBtnBaseColor;
         private bool _playerInfoCreated;
+        private ulong _currentLobbyId;
 
         private void Awake()
         {
@@ -39,15 +40,25 @@ namespace Steam.UI
             _startGameBtn.interactable = false;
         }
 
-        public void ReadyPlayer() =>
-            _localLobbyPlayerController.ChangeReady();
+        public void ReadyPlayer() => _localLobbyPlayer.ChangeReady();
 
-        public void SetLocalPlayer(LobbyPlayerController localPlayerController) =>
-            _localLobbyPlayerController = localPlayerController;
-        
-        public void UpdateLobbyName() =>
-            _lobbyNameText.text = $"{SteamMatchmaking.GetLobbyData(SteamLobby.LobbyId, "name")}`s lobby";
+        public void SetLocalPlayer(LobbyPlayerController playerController) =>
+            _localLobbyPlayer = playerController;
 
+        public void LeaveLobby()
+        {
+            SteamMatchmaking.LeaveLobby(new CSteamID(_currentLobbyId));
+            if (isServer) _networkManager.StopHost();
+            else _networkManager.StopClient();
+            _steamLobby.LeaveLobby();
+        }
+
+        public void UpdateLobbyName()
+        {
+            if (_withoutSteam) return;
+            _currentLobbyId = SteamLobby.CurrentLobbyId;
+            _lobbyNameText.text = SteamMatchmaking.GetLobbyData(new CSteamID(_currentLobbyId), "name");
+        }
 
         #region UpdateUI
 
@@ -66,7 +77,7 @@ namespace Steam.UI
                 var newPlayerItem = Instantiate(_playerInfoPrefab, _layout.gameObject.transform);
                 newPlayerItem.Init(player.PlayerName, player.ConnectionId,
                     player.PlayerSteamId, player.ReadyStatus);
-                newPlayerItem.UpdateInfo();
+                newPlayerItem.UpdateUI();
                 _layout.Align(true);
                 _players.Add(player, newPlayerItem);
             }
@@ -82,7 +93,7 @@ namespace Steam.UI
                 var newPlayerItem = Instantiate(_playerInfoPrefab, _layout.gameObject.transform);
                 newPlayerItem.Init(player.PlayerName, player.ConnectionId,
                     player.PlayerSteamId, player.ReadyStatus);
-                newPlayerItem.UpdateInfo();
+                newPlayerItem.UpdateUI();
                 _layout.Align(true);
                 _players.Add(player, newPlayerItem);
             }
@@ -112,8 +123,8 @@ namespace Steam.UI
                     continue;
                 }
                 info.Init(player.PlayerName, player.ReadyStatus);
-                info.UpdateInfo();
-                if (player == _localLobbyPlayerController)
+                info.UpdateUI();
+                if (player == _localLobbyPlayer)
                     UpdateBtn();
             }
             CheckLobbyReadyStatus();
@@ -122,7 +133,7 @@ namespace Steam.UI
         #endregion
 
         private void UpdateBtn() =>
-            _readyBtnText.text = _localLobbyPlayerController.ReadyStatus
+            _readyBtnText.text = _localLobbyPlayer.ReadyStatus
                 ? "<color=red>Not ready</color>"
                 : "<color=green>Ready</color>";
 
@@ -136,7 +147,7 @@ namespace Steam.UI
             if (ready)
             {
                 _startButtonText.color = _startBtnBaseColor;
-                _startGameBtn.interactable = _localLobbyPlayerController.PlayerIdNumber == 0;
+                _startGameBtn.interactable = -_localLobbyPlayer.PlayerIdNumber == 0;
             }
             else
             {

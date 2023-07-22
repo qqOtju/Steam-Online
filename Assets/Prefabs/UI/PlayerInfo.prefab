@@ -422,6 +422,7 @@ MonoBehaviour:
   _displayProfileImage: {fileID: 7124069642902585514}
   _displayNicknameText: {fileID: 3231036090221268853}
   _displayStatusText: {fileID: 5880658659726400171}
+  _withoutSteam: 1
   playerName: 
   connectionId: 0
   playerSteamId: 0

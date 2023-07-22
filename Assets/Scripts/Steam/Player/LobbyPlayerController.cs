@@ -2,6 +2,7 @@
 using MyMirror;
 using Steam.UI;
 using Steamworks;
+using UnityEngine;
 
 namespace Steam.Player
 {
@@ -14,23 +15,24 @@ namespace Steam.Player
         [SyncVar] private ulong _playerSteamId;
         [SyncVar] private int _playerIdNumber;
         [SyncVar] private int _connectionId;
-
+        
         private UILobbyController _lobbyController;
         private UILobbyController LobbyController
         {
             get
             {
                 if (_lobbyController != null) return _lobbyController;
-                return _lobbyController = Network.LobbyController;
+                return _lobbyController = Room.LobbyController;
             }
         }
-        private MyNetworkManager _network;
-        private MyNetworkManager Network
+        
+        private MyNetworkManager _room;
+        private MyNetworkManager Room
         {
             get
             {
-                if (_network != null) return _network;
-                return _network = NetworkManager.singleton as MyNetworkManager;
+                if (_room != null) return _room;
+                return _room = NetworkManager.singleton as MyNetworkManager;
             }
         }
 
@@ -39,37 +41,30 @@ namespace Steam.Player
         public int ConnectionId => _connectionId;
         public bool ReadyStatus => _readyStatus;
         public string PlayerName => _playerName;
-        
-        public void Init(int connId, int idNum, ulong steamId, UILobbyController lobbyController)
-        {
-            _connectionId = connId;
-            _playerIdNumber = idNum;
-            _playerSteamId = steamId;
-            _lobbyController = lobbyController;
-        }
 
         #region NetworkCallbacks
 
         /*
-         * Когда я создаю лобби создается новый экзепляр этого класса (объекта) и посколько я имею над этим объектом власть (authority),
-         * то у меня вызывается метод OnStartAuthority() и OnStartClient(), но когда ко мне подключается игрок, например Данил, то создается
-         * экзепляр класса (объекта) над которым я не имею власти (authority) и у него вызывается только OnStartClient().
-         *
-         * Когда создается класс (объект) над которым у меня есть власть он отправляет команду CmdSetPlayerName() на сервер, эта команда вызывает
-         * метод PlayerNameUpdate() в котором есть проверка на то этот метод происходит на сервере или на клиенте, если на сервере то переменной
-         * _playerName устанавливается новое значение, а если на клиенте то обновляется интерфейс лобби. Не стоит забывать, что при смене значения
-         * переменной _playerName срабатывает хук с тем же методом PlayerNameUpdate(), что означает, что при отправке команды CmdSetPlayerName() метод
-         * PlayerNameUpdate() сработает 2 раза 1 раз на сервера другой раз на клиенте. Важно понимать, чтобы сработал хук на SyncVar переменная должна поменять
-         * ИМЕННО НА СЕРВЕРЕ.
-         */
-        
+        * Когда я создаю лобби создается новый экзепляр этого класса (объекта) и посколько я имею над этим объектом власть (authority),
+        * то у меня вызывается метод OnStartAuthority() и OnStartClient(), но когда ко мне подключается игрок, например Данил, то создается
+        * экзепляр класса (объекта) над которым я не имею власти (authority) и у него вызывается только OnStartClient().
+        *
+        * Когда создается класс (объект) над которым у меня есть власть он отправляет команду CmdSetPlayerName() на сервер, эта команда вызывает
+        * метод PlayerNameUpdate() в котором есть проверка на то этот метод происходит на сервере или на клиенте, если на сервере то переменной
+        * _playerName устанавливается новое значение, а если на клиенте то обновляется интерфейс лобби. Не стоит забывать, что при смене значения
+        * переменной _playerName срабатывает хук с тем же методом PlayerNameUpdate(), что означает, что при отправке команды CmdSetPlayerName() метод
+        * PlayerNameUpdate() сработает 2 раза 1 раз на сервера другой раз на клиенте. Важно понимать, чтобы сработал хук на SyncVar переменная должна поменять
+        * ИМЕННО НА СЕРВЕРЕ.
+        */
+
         /// <summary>
         /// Like Start(), but only called for objects the client has authority over.
         /// Means called only on the local player.
         /// </summary>
         public override void OnStartAuthority()
         {
-            CmdSetPlayerName(SteamFriends.GetPersonaName());
+            CmdSetPlayerName(_playerSteamId == 0 ? "Oleg" : SteamFriends.GetPersonaName());
+            gameObject.name = "LocalPlayer";
             LobbyController.SetLocalPlayer(this);
             LobbyController.UpdateLobbyName();
         }
@@ -81,36 +76,46 @@ namespace Steam.Player
         /// </summary>
         public override void OnStartClient()
         {
-            if (Network.LobbyPlayers.Contains(this)) return;
-            //if the new client
+            if (Room.LobbyPlayers.Contains(this)) return;
+            Debug.Log("OnStartClient");
             DontDestroyOnLoad(gameObject);
-            Network.LobbyPlayers.Add(this);
+            Room.LobbyPlayers.Add(this);
             LobbyController.UpdateLobbyName();
             LobbyController.UpdatePlayerList();
         }
 
+
         public override void OnStopClient()
         {
-            Network.LobbyPlayers.Remove(this);
+            Room.LobbyPlayers.Remove(this);
             LobbyController.UpdatePlayerList();
         }
 
         #endregion
-
+        
         #region Commands
 
         [Command]
-        private void CmdSetPlayerName(string newName)
-            => PlayerNameUpdate(_playerName, newName);
+        private void CmdSetPlayerName(string playerName)
+            => PlayerNameUpdate(_playerName, playerName);
 
         [Command]
         private void CmdSetPlayerReady()
             => PlayerReadyUpdate(_readyStatus, !_readyStatus);
 
         #endregion
-        
-        public void ChangeReady() => 
-            CmdSetPlayerReady();
+
+        public void Init(int connId, int idNum, ulong steamId)
+        {
+            _connectionId = connId;
+            _playerIdNumber = idNum;
+            _playerSteamId = steamId;
+        }
+
+        public void ChangeReady()
+        {
+            if (isOwned) CmdSetPlayerReady();
+        }
 
         private void PlayerNameUpdate(string oldValue, string newValue)
         {

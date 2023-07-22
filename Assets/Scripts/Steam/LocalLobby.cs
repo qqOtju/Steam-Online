@@ -1,13 +1,11 @@
-﻿using kcp2k;
-using Mirror;
-using Mirror.FizzySteam;
+﻿using Mirror;
 using MyMirror;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Steam
 {
-    public class LocalLobby : NetworkBehaviour
+    public class LocalLobby : MonoBehaviour
     {
         [Header("Panels")] 
         [SerializeField] private GameObject _menuPanel;
@@ -15,8 +13,6 @@ namespace Steam
         [Header("Other")]
         [SerializeField] [Scene] private string _menuScene = null;
         [SerializeField] private MyNetworkManager _networkManager;
-        [SerializeField] private KcpTransport _kcpTransport;
-        [SerializeField] private FizzySteamworks _fizzySteamworks;
         
         public void HostLobby()
         {
@@ -38,13 +34,13 @@ namespace Steam
                 _networkManager.ServerChangeScene("Scene_Map_01");
         }
         
-        public void LeaveLobby()
+        /*public void LeaveLobby()
         {
             if (isServer) _networkManager.StopHost();
             else _networkManager.StopClient();
             _menuPanel.gameObject.SetActive(true);
             _lobbyPanel.gameObject.SetActive(false);
             gameObject.SetActive(true);
-        }
+        }*/
     }
 }

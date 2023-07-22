@@ -14,24 +14,26 @@ namespace Steam.UI
         [SerializeField] private Image _displayStatusImage;
         [SerializeField] private Color _readyColor;
         [SerializeField] private Color _notReadyColor;
+        [Header("Other")]
+        [SerializeField] private bool _withoutSteam;
         
         private string _playerName;
-        private int _connectionId;
         private ulong _playerSteamId;
         private bool _avatarReceived = false;
         private bool _ready;
-
-        public int ConnectionId => _connectionId;
         
+        public int ConnectionId { get; private set; }
+
         private void Start()
         {
-            Callback<AvatarImageLoaded_t>.Create(OnAvatarImageLoaded);
+            if(!_withoutSteam)
+                Callback<AvatarImageLoaded_t>.Create(OnAvatarImageLoaded);
         }
 
         public void Init(string playerName, int connId, ulong steamId, bool ready)
         {
             _playerName = playerName;
-            _connectionId = connId;
+            ConnectionId = connId;
             _playerSteamId = steamId;
             _ready = ready;
         }
@@ -42,31 +44,31 @@ namespace Steam.UI
             _ready = ready;
         }
         
-        public void UpdateInfo()
+        public void UpdateUI()
         {
             _displayNicknameText.text = _playerName;
             ChangePlayerStatus();
-            if(!_avatarReceived) GetPlayerIcon();
+            if (!_avatarReceived) GetPlayerIcon();
         }
 
         private void ChangePlayerStatus() => 
             _displayStatusImage.color = _ready ? _readyColor : _notReadyColor;
-        
-        
 
         private void GetPlayerIcon()
         {
+            if (_withoutSteam) return;
             var imageId = SteamFriends.GetLargeFriendAvatar((CSteamID)_playerSteamId);
-            if(imageId == -1) return;
+            if (imageId == -1) return;
             _displayProfileImage.texture = GetSteamImageAsTexture(imageId);
         }
-        
+
         private void OnAvatarImageLoaded(AvatarImageLoaded_t callback)
         {
-            if(callback.m_steamID.m_SteamID != _playerSteamId) return;
+            if (_withoutSteam) return;
+            if (callback.m_steamID.m_SteamID != _playerSteamId) return;
             _displayProfileImage.texture = GetSteamImageAsTexture(callback.m_iImage);
         }
-        
+
         private Texture2D GetSteamImageAsTexture(int imageId)
         {
             Texture2D texture = null;
