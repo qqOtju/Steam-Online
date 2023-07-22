@@ -1,6 +1,5 @@
 ﻿using InputSystem;
 using Mirror;
-using Steam.Interface;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,7 +8,7 @@ namespace Steam.Player
 {
     [SelectionBase]
     [RequireComponent(typeof(Rigidbody), typeof(Animator))]
-    public class GamePlayerController : NetworkBehaviour, IHealth
+    public class GamePlayerController : NetworkBehaviour
     {
         [Header("Atom constants")]
         [SerializeField] private FloatConstant _maxHealth;
@@ -38,7 +37,6 @@ namespace Steam.Player
         private readonly int _animSpeedParam = Animator.StringToHash("Speed");
 
         private PlayerMovementController _movement;
-        private PlayerHealthController _health;
         private Transform _transform;
         private Animator _animator;
         private Controls _controls;
@@ -54,7 +52,6 @@ namespace Steam.Player
             _controls.Player.Sprint.performed += SprintChange;
             _controls.Player.Sprint.canceled += SprintChange;
             _controls.Player.Punch.performed += Punch;
-            _health = new(_maxHealth.Value);
             _currentHealth.Value = _maxHealth.Value;
         }
 
@@ -85,7 +82,6 @@ namespace Steam.Player
             _animator = GetComponent<Animator>();
             _movement = new(_rb, _cameraTarget.gameObject, 
                 _meshContainer, _rotationSmoothTime, _movementCurve);
-            _health.OnDeath += HandleDeath;
         }
 
         [ClientCallback]
@@ -177,12 +173,6 @@ namespace Steam.Player
         #endregion
         
         #region Health
-
-        [Server]
-        public void GetDamage(float dmg) => _currentHealth.Value = _health.GetDamage(dmg);
-
-        [Server]
-        public void GetHeal(float heal) => _currentHealth.Value = _health.GetHeal(heal);
 
         [ClientRpc]
         private void HandleDeath() =>
