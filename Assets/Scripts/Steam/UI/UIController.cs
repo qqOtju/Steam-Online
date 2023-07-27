@@ -23,11 +23,10 @@ namespace Steam.UI
         [SerializeField] private TextMeshProUGUI _healthText;
         [SerializeField] private FloatEvent _onHealthChange;
         [SerializeField] private FloatConstant _maxHealth;
-        
 
         private UIPlayerStatus _playerStatus;
-        private bool _cursorState;
         private Controls _controls;
+        private bool _cursorState;
 
         #region Mono
         

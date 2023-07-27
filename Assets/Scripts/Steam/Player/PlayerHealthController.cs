@@ -19,7 +19,7 @@ namespace Steam.Player
         {
             if(_currentHealth <= 0)
                 return _currentHealth;
-            if(_currentHealth - dmg == 0)
+            if(_currentHealth - dmg <= 0)
             {
                 _currentHealth -= dmg;
                 OnDeath?.Invoke();

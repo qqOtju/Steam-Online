@@ -193,7 +193,7 @@ MonoBehaviour:
   _displayStatusImage: {fileID: 2388183823138986364}
   _readyColor: {r: 0.33333328, g: 0.99607843, b: 0.3508864, a: 1}
   _notReadyColor: {r: 0.9960785, g: 0.33333334, b: 0.33333334, a: 1}
-  _withoutSteam: 1
+  _withoutSteam: 0
 --- !u!114 &3416941505106160212
 MonoBehaviour:
   m_ObjectHideFlags: 0

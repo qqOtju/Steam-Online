@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5319202991269858527}
   - component: {fileID: 5319202991269858524}
   - component: {fileID: 5319202991269858525}
-  - component: {fileID: 5319202991269858523}
+  - component: {fileID: 4074082238829402111}
   - component: {fileID: 5319202991269858520}
   m_Layer: 0
   m_Name: NewLaser
@@ -348,7 +348,7 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
---- !u!114 &5319202991269858523
+--- !u!114 &4074082238829402111
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -357,16 +357,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 5319202991269858521}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f944b00c3fb48e1a8d0bd60e112bf55, type: 3}
+  m_Script: {fileID: 11500000, guid: 69fb017944d8403eae9b9cf7124ba5ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  _laserDamage: {fileID: 11400000, guid: c4e56bba3f4517d4ca9d072b1b7d34b0, type: 2}
+  _laserDamage: {fileID: 11400000, guid: f1d51daf19ec5af4e9d52a0961576841, type: 2}
   _startTransform: {fileID: 5319202992296372010}
   _laserObj: {fileID: 7285548839018973594}
-  _timeBeforeDamage: 0.2
+  _timeBeforeDamage: 0.1
 --- !u!114 &5319202991269858520
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -532,10 +532,10 @@ MonoBehaviour:
   target: {fileID: 6025093405369758120}
   clientAuthority: 0
   syncPosition: 1
-  syncRotation: 1
-  syncScale: 0
+  syncRotation: 0
+  syncScale: 1
   interpolatePosition: 1
-  interpolateRotation: 1
+  interpolateRotation: 0
   interpolateScale: 1
   sendIntervalMultiplier: 1
   timelineOffset: 0

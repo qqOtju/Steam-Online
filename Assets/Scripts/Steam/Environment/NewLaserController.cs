@@ -24,7 +24,7 @@ namespace Steam.Environment
             _startPos = _startTransform.position;
         }
 
-        [ClientRpc]
+        [ServerCallback]
         private void FixedUpdate()
         {
             if(_damaging)

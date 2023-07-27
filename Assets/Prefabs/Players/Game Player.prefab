@@ -586,7 +586,7 @@ MonoBehaviour:
   _airSprintSpeed: {fileID: 11400000, guid: 0f4ddf8e51b04d441aae2796a5be5dcb, type: 2}
   _jumpHeight: {fileID: 11400000, guid: c71f15ead2d9718498933d3423fa512a, type: 2}
   _punchPower: {fileID: 11400000, guid: b04d021eda24b804ab35a6133e1d1f39, type: 2}
-  _currentHealth: {fileID: 11400000, guid: d5edb547aba68df479a499438b6643a5, type: 2}
+  _currentH: {fileID: 11400000, guid: d5edb547aba68df479a499438b6643a5, type: 2}
   _isGrounded: {fileID: 11400000, guid: 85a5cacdda24482419a894322d20a647, type: 2}
   _isSprinting: {fileID: 11400000, guid: 6ed166aebba80424f87f5167f3f17d11, type: 2}
   _rotationSmoothTime: 0.125

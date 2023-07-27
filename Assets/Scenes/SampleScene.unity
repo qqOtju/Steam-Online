@@ -1251,7 +1251,7 @@ MonoBehaviour:
     type: 3}
   _lobbyController: {fileID: 549792302}
   _menuScene: Assets/Scenes/SampleScene.unity
-  _withoutSteam: 1
+  _withoutSteam: 0
 --- !u!114 &508807165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1261,26 +1261,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 508807160}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b0fecffa3f624585964b0d0eb21b18e, type: 3}
+  m_Script: {fileID: 11500000, guid: e6e55fca1f4e4844593a3dd65a3ecb39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  port: 7777
-  DualMode: 1
-  NoDelay: 1
-  Interval: 10
-  Timeout: 10000
-  RecvBufferSize: 7361536
-  SendBufferSize: 7361536
-  FastResend: 2
-  ReceiveWindowSize: 4096
-  SendWindowSize: 4096
-  MaxRetransmit: 40
-  MaximizeSocketBuffers: 1
-  ReliableMaxMessageSize: 297433
-  UnreliableMaxMessageSize: 1195
-  debugLog: 0
-  statisticsGUI: 0
-  statisticsLog: 0
+  Channels: 0200000001000000
+  Timeout: 25
+  AllowSteamRelay: 1
+  UseNextGenSteamNetworking: 1
 --- !u!1 &511046587
 GameObject:
   m_ObjectHideFlags: 0
@@ -1395,11 +1382,11 @@ MonoBehaviour:
     type: 3}
   _layout: {fileID: 1807874609}
   _networkManager: {fileID: 508807164}
-  _steamLobby: {fileID: 0}
+  _steamLobby: {fileID: 555774639999180231}
   _startGameBtn: {fileID: 719156936}
   _startButtonText: {fileID: 693143887}
   _readyBtnText: {fileID: 1614473532}
-  _withoutSteam: 1
+  _withoutSteam: 0
 --- !u!4 &549792303
 Transform:
   m_ObjectHideFlags: 0
@@ -1906,8 +1893,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1159020842}
-        m_TargetAssemblyTypeName: Steam.LocalLobby, Assembly-CSharp
+      - m_Target: {fileID: 555774639999180231}
+        m_TargetAssemblyTypeName: Steam.SteamLobby, Assembly-CSharp
         m_MethodName: StartGame
         m_Mode: 1
         m_Arguments:
@@ -2115,7 +2102,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1159020842}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: Steam.LocalLobby, Assembly-CSharp
         m_MethodName: HostLobby
         m_Mode: 1
@@ -2430,54 +2417,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 936355625}
   m_CullTransparentMesh: 1
---- !u!1 &1159020841
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1159020843}
-  - component: {fileID: 1159020842}
-  m_Layer: 0
-  m_Name: LocalLobbyController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1159020842
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1159020841}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c92c7eece1154be2bf6126605404a801, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _menuPanel: {fileID: 120377474}
-  _lobbyPanel: {fileID: 859961890}
-  _menuScene: Assets/Scenes/SampleScene.unity
-  _networkManager: {fileID: 508807164}
---- !u!4 &1159020843
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1159020841}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 8
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1237500897
 GameObject:
   m_ObjectHideFlags: 0
@@ -2969,19 +2908,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 555774639999180231}
         m_TargetAssemblyTypeName: Steam.SteamLobby, Assembly-CSharp
         m_MethodName: HostLobby
         m_Mode: 1
@@ -2991,7 +2918,7 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 0
+          m_BoolArgument: 1
         m_CallState: 2
       - m_Target: {fileID: 228214797}
         m_TargetAssemblyTypeName: Steam.UI.UIAnimationsController, Assembly-CSharp
@@ -3835,7 +3762,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1159020842}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: Steam.LocalLobby, Assembly-CSharp
         m_MethodName: JoinLobby
         m_Mode: 1
@@ -4639,3 +4566,65 @@ MonoBehaviour:
   spacing: {x: 0, y: 100}
   horizontalPadding: {x: 0, y: 50}
   verticalPadding: {x: 150, y: 150}
+--- !u!1 &555774639999180226
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 555774639999180228}
+  - component: {fileID: 555774639999180229}
+  - component: {fileID: 555774639999180231}
+  m_Layer: 0
+  m_Name: SteamManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &555774639999180228
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555774639999180226}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &555774639999180229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555774639999180226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef4bffeda13d7a748973ff9204401c07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &555774639999180231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555774639999180226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a4a827f06894168867e2ec8196605aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _menuPanel: {fileID: 120377474}
+  _lobbyPanel: {fileID: 859961890}
+  _lobbyNameText: {fileID: 96007958}
+  _menuScene: Assets/Scenes/SampleScene.unity
+  _networkManager: {fileID: 508807164}

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using InputSystem;
 using Mirror;
 using Mirror.Experimental;
@@ -23,8 +24,9 @@ namespace Steam.Player
         [SerializeField] private FloatConstant _airSprintSpeed;
         [SerializeField] private FloatConstant _jumpHeight;
         [SerializeField] private FloatConstant _punchPower;
+
         [Header("Atom variables")] 
-        [SerializeField] private FloatVariable _currentHealth;
+        [SerializeField] private FloatVariable _currentH;
         [SerializeField] private BoolVariable _isGrounded;
         [SerializeField] private BoolVariable _isSprinting;
         [Header("Variables")] 
@@ -37,12 +39,14 @@ namespace Steam.Player
         [SerializeField] private Transform _cameraTarget;
         [SerializeField] private GameObject _meshContainer;
         [SerializeField] private AnimationCurve _movementCurve;
-        
+
         #endregion
 
+        [SyncVar(hook = nameof(UpdateHealthValue))] private float _syncHealth;
+
         private readonly int _animGrounded = Animator.StringToHash("Grounded");
-        private readonly int _animPunch = Animator.StringToHash("Punch");
         private readonly int _animSpeed = Animator.StringToHash("Speed");
+        private const int _yPunchPower = 3;
 
         private readonly WaitForSeconds _wfs = new(0.5f);
         private PlayerMovementController _movement;
@@ -52,7 +56,10 @@ namespace Steam.Player
         private Animator _animator;
         private Rigidbody _rb;
         private Vector2 _input;
-
+        
+        public event Action<NetworkBehaviour> OnPlayerDeath;
+        public int index;
+        
         public override void OnStartAuthority()
         {
             enabled = true;
@@ -62,6 +69,12 @@ namespace Steam.Player
             _controls.Player.Sprint.performed += SprintChange;
             _controls.Player.Sprint.canceled += SprintChange;
             _controls.Player.Punch.performed += Punch;
+        }
+
+        public override void OnStartClient()
+        {
+            _health = new(_maxHealth.Value);
+            _health.OnDeath += CmdHandleDeath;
         }
 
         public override void OnStopAuthority()
@@ -85,12 +98,9 @@ namespace Steam.Player
         [ClientCallback]
         private void Start()
         {
-            if (!isOwned) return;
             _rb = GetComponent<Rigidbody>();
             _animator = GetComponent<Animator>();
             _networkAnimator = GetComponent<NetworkAnimator>();
-            _health = new(_maxHealth.Value);
-            _currentHealth.Value = _maxHealth.Value;
             _movement = new(_rb, _cameraTarget.gameObject,
                 _meshContainer, _rotationSmoothTime, _movementCurve);
             StartCoroutine(WaitReady());
@@ -196,7 +206,6 @@ namespace Steam.Player
         private void Punch(InputAction.CallbackContext obj)
         {
             if (!isOwned || !isLocalPlayer) return;
-            _networkAnimator.SetTrigger(_animPunch);
             CmdPushPlayer();
         }
 
@@ -216,21 +225,32 @@ namespace Steam.Player
             Push(player.GetComponent<Rigidbody>(), dir);
 
         private void Push(Rigidbody rb, Vector3 dir) =>
-            rb.AddForce(dir * _punchPower.Value + Vector3.up * 3, ForceMode.Impulse);
+            rb.AddForce(dir * _punchPower.Value + Vector3.up * _yPunchPower, ForceMode.Impulse);
 
         #endregion
 
         #region Health
 
         public void GetDamage(float dmg) =>
-            _currentHealth.Value = _health.GetDamage(dmg);
+            _syncHealth = _health.GetDamage(dmg);
 
         public void GetHeal(float heal) =>
-            _currentHealth.Value = _health.GetHeal(heal);
+           _syncHealth = _health.GetHeal(heal);
 
-        [ClientRpc]
-        private void HandleDeath() =>
-            _controls.Disable();
+        [Command(requiresAuthority = false)]
+        private void CmdHandleDeath()
+        {
+            Debug.Log("CmdHandleDeath");
+            OnPlayerDeath?.Invoke(this);
+            if (isServer)
+                _health.GetHeal(50);
+        }
+
+        private void UpdateHealthValue(float oldValue, float newValue) 
+        { 
+            if(isOwned)
+                _currentH.Value = newValue;
+        }
 
         #endregion
     }

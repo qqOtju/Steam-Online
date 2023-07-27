@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Mirror;
 using MyMirror;
+using Steam.Player;
 using UnityEngine;
 
 namespace Steam.Scene
@@ -8,7 +9,7 @@ namespace Steam.Scene
     public class PlayerSpawnSystem : NetworkBehaviour
     {
         [SerializeField] private List<Transform> _spawnPoint;
-        
+
         private MyNetworkManager _networkManager;
         
         private MyNetworkManager Manager
@@ -31,9 +32,19 @@ namespace Steam.Scene
             var players = Manager.GamePLayers;
             for (int i = 0; i < players.Count; i++)
             {
-                players[i].transform.position = _spawnPoint[i].position;
-                players[i].gameObject.SetActive(true);
+                var player = players[i];
+                player.transform.position = _spawnPoint[i].position;
+                player.gameObject.SetActive(true);
+                player.index = i;
+                player.OnPlayerDeath += OnOnPlayerDeath;
             }
+        }
+
+        [ClientRpc]
+        private void OnOnPlayerDeath(NetworkBehaviour obj)
+        {
+            var index = obj.gameObject.GetComponent<GamePlayerController>().index;
+            obj.gameObject.transform.position = _spawnPoint[index].position;
         }
 
         private void OnDrawGizmos()
