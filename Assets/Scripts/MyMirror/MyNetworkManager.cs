@@ -12,6 +12,7 @@ namespace MyMirror
 {
     public class MyNetworkManager : NetworkManager
     {
+        [SerializeField] private Transform[] _spawnPoints;
         [SerializeField] private LobbyPlayerController _intermediatePlayerPrefab;
         [SerializeField] private GamePlayerController _gamePlayerPrefab;
         [SerializeField] private UILobbyController _lobbyController;
@@ -27,6 +28,8 @@ namespace MyMirror
             if(SceneManager.GetActiveScene().name != _menuScene.SceneName()) return;
             var gamePlayer = Instantiate(_intermediatePlayerPrefab);
             gamePlayer.Init(conn.connectionId, numPlayers, _withoutSteam?0:SteamMatchmaking.GetLobbyMemberByIndex(SteamLobby.LobbyId, numPlayers).m_SteamID);
+            gamePlayer.gameObject.transform.position = _spawnPoints[numPlayers].position;
+            gamePlayer.gameObject.transform.rotation = _spawnPoints[numPlayers].rotation;
             NetworkServer.AddPlayerForConnection(conn, gamePlayer.gameObject);
         }
 
@@ -38,8 +41,9 @@ namespace MyMirror
                 {
                     var conn = LobbyPlayers[i].connectionToClient;
                     var gamePlayerInstance = Instantiate(_gamePlayerPrefab);
-                    NetworkServer.Destroy(conn.identity.gameObject);
                     gamePlayerInstance.gameObject.SetActive(false);
+                    gamePlayerInstance.Init(LobbyPlayers[i].PlayerIdNumber, LobbyPlayers[i].PlayerName);
+                    NetworkServer.Destroy(conn.identity.gameObject);
                     NetworkServer.ReplacePlayerForConnection(conn, gamePlayerInstance.gameObject);
                     GamePLayers.Add(gamePlayerInstance);
                 }

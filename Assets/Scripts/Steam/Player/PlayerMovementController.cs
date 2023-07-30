@@ -46,15 +46,10 @@ namespace Steam.Player
         private void Move(Vector2 inputValue, bool isGrounded, bool isSprinting, float speed, float sprintSpeed,
             float airSpeed, float airSprintSpeed)
         {
-            if (inputValue == Vector2.zero)
-            {
-                _movementValue = 0;
-                return;
-            }
-
             var forceDir = inputValue.y * GetCameraForward(_targetTransform);
             forceDir += inputValue.x * GetCameraRight(_targetTransform);
-            _movementValue += Time.deltaTime;
+            if (inputValue == Vector2.zero) _movementValue = 0;
+            else _movementValue += Time.deltaTime;
             Vector3 velocity;
             if (isGrounded)
                 velocity = forceDir * ((isSprinting ? sprintSpeed : speed) * _movementCurve.Evaluate(_movementValue));

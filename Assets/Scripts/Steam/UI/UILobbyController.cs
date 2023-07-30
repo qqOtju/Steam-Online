@@ -3,6 +3,7 @@ using System.Linq;
 using GridLayout;
 using Mirror;
 using MyMirror;
+using Steam.Level;
 using Steam.Player;
 using Steamworks;
 using TMPro;
@@ -13,51 +14,78 @@ namespace Steam.UI
 {
     public class UILobbyController : NetworkBehaviour
     {
-        [Header("Lobby main")] 
-        [SerializeField] private TextMeshProUGUI _lobbyNameText;
+        [Header("Lobby main")]
         [SerializeField] private UIPlayerInfo _playerInfoPrefab;
-        [Tooltip("Players info container")] 
+        [Tooltip("Players info container")]
         [SerializeField] private AbstractGridLayout _layout;
         [SerializeField] private MyNetworkManager _networkManager;
         [SerializeField] private SteamLobby _steamLobby;
-        [Header("Buttons")] 
-        [SerializeField] private Button _startGameBtn;
-        [SerializeField] private TextMeshProUGUI _startButtonText;
-        [SerializeField] private TextMeshProUGUI _readyBtnText;
+        [SerializeField] private LocalLobby _localLobby;
+        [Header("Start Button")]
+        [SerializeField] private Image _startBtnIcon;
+        [SerializeField] private TextMeshProUGUI _startBtnText;
+        [SerializeField] private UIMyButton _startBtn;
+        [Header("Map Button")]
+        [SerializeField] private Image _mapBtnIcon;
+        [SerializeField] private TextMeshProUGUI _mapBtnText;
+        [SerializeField] private UIMyButton _mapBtn;
+        [Header("Level")]
+        [SerializeField] private SOLevelInfo[] _levels;
+        [SerializeField] private Image _levelImage;
+        [SerializeField] private TextMeshProUGUI _levelNameText;
+        [Header("Other")]
         [SerializeField] private bool _withoutSteam;
 
         private readonly Dictionary<LobbyPlayerController, UIPlayerInfo> _players = new();
         private readonly Color _multiplyColor = new(0.5f, 0.5f, 0.5f, 1f);
         private LobbyPlayerController _localLobbyPlayer;
+        private SOLevelInfo _currentLevel;
         private Color _startBtnBaseColor;
         private bool _playerInfoCreated;
-        private ulong _currentLobbyId;
+        private int _currentLevelIndex;
 
         private void Awake()
         {
-            _startBtnBaseColor = _startButtonText.color;
-            _startButtonText.color = _multiplyColor;
-            _startGameBtn.interactable = false;
+            SetLevel(0);
+            _startBtnBaseColor = _startBtnText.color;
+            _startBtnText.color = _multiplyColor;
+            _startBtn.Interactable = false;
+            _mapBtnIcon.color = _multiplyColor;
+            _mapBtnText.color = _multiplyColor;
+            _mapBtn.Interactable = false;
         }
 
         public void ReadyPlayer() => _localLobbyPlayer.ChangeReady();
 
-        public void SetLocalPlayer(LobbyPlayerController playerController) =>
-            _localLobbyPlayer = playerController;
-
-        public void LeaveLobby()
+        public void SetLocalPlayer(LobbyPlayerController playerController)
         {
-            SteamMatchmaking.LeaveLobby(new CSteamID(_currentLobbyId));
-            if (isServer) _networkManager.StopHost();
-            else _networkManager.StopClient();
-            _steamLobby.LeaveLobby();
+            _localLobbyPlayer = playerController;
+            if (_localLobbyPlayer.PlayerIdNumber != 0) return;
+            _mapBtn.Interactable = true;
+            _mapBtnIcon.color = _startBtnBaseColor;
+            _mapBtnText.color = _startBtnBaseColor;
         }
 
-        public void UpdateLobbyName()
+        public void ChangeLevel(int dir)
         {
-            if (_withoutSteam) return;
-            _currentLobbyId = SteamLobby.CurrentLobbyId;
-            _lobbyNameText.text = SteamMatchmaking.GetLobbyData(new CSteamID(_currentLobbyId), "name");
+            if (dir > 0)
+                SetLevel(_currentLevelIndex + 1);
+            else if(dir < 0)
+                SetLevel(_currentLevelIndex - 1);
+        }
+
+        private void SetLevel(int index)
+        {
+            if (index < 0)
+                index = _levels.Length - 1;
+            if (index == _levels.Length)
+                index = 0;
+            _currentLevelIndex = index;
+            _currentLevel = _levels[_currentLevelIndex];
+            _levelImage.sprite = _currentLevel.LevelImage;
+            _levelNameText.text = _currentLevel.LevelName;
+            if (_withoutSteam) _localLobby.SetLevel(_currentLevel);
+            else _steamLobby.SetLevel(_currentLevel);
         }
 
         #region UpdateUI
@@ -124,18 +152,9 @@ namespace Steam.UI
                 }
                 info.Init(player.PlayerName, player.ReadyStatus);
                 info.UpdateUI();
-                if (player == _localLobbyPlayer)
-                    UpdateBtn();
             }
             CheckLobbyReadyStatus();
         }
-
-        #endregion
-
-        private void UpdateBtn() =>
-            _readyBtnText.text = _localLobbyPlayer.ReadyStatus
-                ? "<color=red>Not ready</color>"
-                : "<color=green>Ready</color>";
 
         private void CheckLobbyReadyStatus()
         {
@@ -144,16 +163,20 @@ namespace Steam.UI
                 ready = false;
 
 
-            if (ready)
+            if (ready && _localLobbyPlayer.PlayerIdNumber == 0)
             {
-                _startButtonText.color = _startBtnBaseColor;
-                _startGameBtn.interactable = -_localLobbyPlayer.PlayerIdNumber == 0;
+                _startBtnText.color = _startBtnBaseColor;
+                _startBtnIcon.color = _startBtnBaseColor;
+                _startBtn.Interactable = -_localLobbyPlayer.PlayerIdNumber == 0;
             }
             else
             {
-                _startButtonText.color = _multiplyColor;
-                _startGameBtn.interactable = false;
+                _startBtnText.color = _multiplyColor;
+                _startBtnIcon.color = _multiplyColor;
+                _startBtn.Interactable = false;
             }
         }
+
+        #endregion
     }
 }

@@ -24,11 +24,12 @@ namespace Steam.Player
         [SerializeField] private FloatConstant _airSprintSpeed;
         [SerializeField] private FloatConstant _jumpHeight;
         [SerializeField] private FloatConstant _punchPower;
-
         [Header("Atom variables")] 
         [SerializeField] private FloatVariable _currentH;
         [SerializeField] private BoolVariable _isGrounded;
         [SerializeField] private BoolVariable _isSprinting;
+        [SerializeField] private IntVariable _playerIdNumber;
+        [SerializeField] private StringVariable _playerName;
         [Header("Variables")] 
         [SerializeField] private float _rotationSmoothTime = 0.1f;
         [Header("Ground Check")]
@@ -46,7 +47,7 @@ namespace Steam.Player
 
         private readonly int _animGrounded = Animator.StringToHash("Grounded");
         private readonly int _animSpeed = Animator.StringToHash("Speed");
-        private const int _yPunchPower = 3;
+        private const int YPunchPower = 3;
 
         private readonly WaitForSeconds _wfs = new(0.5f);
         private PlayerMovementController _movement;
@@ -60,9 +61,23 @@ namespace Steam.Player
         public event Action<NetworkBehaviour> OnPlayerDeath;
         public int index;
         
+        [SyncVar] public int idNumber;
+        [SyncVar] public string nickname;
+
+        public void Init(int id, string nickname)
+        {
+            idNumber = id;
+            this.nickname = nickname;
+            Debug.Log($"Id: {id}| Nick: {this.nickname}");
+        }
+        
         public override void OnStartAuthority()
         {
             enabled = true;
+            Debug.Log("OnStartAuthority");
+            _playerIdNumber.Value = idNumber;
+            _playerName.Value = nickname;
+            Debug.Log($"SO Id: {_playerIdNumber.Value}| Nick: {_playerName.Value}");
             _controls.Player.Move.performed += SetMovement;
             _controls.Player.Move.canceled += ResetMovement;
             _controls.Player.Jump.performed += Jump;
@@ -137,9 +152,9 @@ namespace Steam.Player
         private void FixedUpdate()
         {
             if (!isOwned && !NetworkClient.ready) return;
-            if (_input != Vector2.zero)
-                Move();
-            _animator.SetFloat(_animSpeed, _rb.velocity.magnitude);
+            Move();
+            if (_input == Vector2.zero) _animator.SetFloat(_animSpeed, 0);
+            else _animator.SetFloat(_animSpeed, _rb.velocity.magnitude);
         }
 
         #endregion
@@ -206,26 +221,24 @@ namespace Steam.Player
         private void Punch(InputAction.CallbackContext obj)
         {
             if (!isOwned || !isLocalPlayer) return;
-            CmdPushPlayer();
-        }
-
-        [Command]
-        private void CmdPushPlayer()
-        {
             if (Physics.Raycast(transform.position, _meshContainer.transform.forward, out var ray, 2f))
                 if (ray.collider.gameObject.TryGetComponent<GamePlayerController>(out var player))
                 {
-                    if (isServer) RpcGetPunched(player, _meshContainer.transform.forward);
-                    if (isClient) Push(player.GetComponent<Rigidbody>(), _meshContainer.transform.forward * 2);
+                    CmdPushPlayer(player, _meshContainer.transform.forward);
+                    Push(player.GetComponent<Rigidbody>(), _meshContainer.transform.forward * 2);
                 }
         }
+
+        [Command]
+        private void CmdPushPlayer(NetworkBehaviour player, Vector3 dir) =>
+            RpcGetPunched(player, _meshContainer.transform.forward);
 
         [ClientRpc]
         private void RpcGetPunched(NetworkBehaviour player, Vector3 dir) =>
             Push(player.GetComponent<Rigidbody>(), dir);
 
         private void Push(Rigidbody rb, Vector3 dir) =>
-            rb.AddForce(dir * _punchPower.Value + Vector3.up * _yPunchPower, ForceMode.Impulse);
+            rb.AddForce(dir * _punchPower.Value + Vector3.up * YPunchPower, ForceMode.Impulse);
 
         #endregion
 

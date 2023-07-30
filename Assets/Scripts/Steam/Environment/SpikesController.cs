@@ -24,6 +24,7 @@ namespace Steam.Environment
         [Command(requiresAuthority = false)]
         private void CmdDealDamage(GamePlayerController player) =>
             DealDamage(player);
+        
         [ServerCallback]
         private void DealDamage(GamePlayerController player) =>
             player.GetDamage(_damage);

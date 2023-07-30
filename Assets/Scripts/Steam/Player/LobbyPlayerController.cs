@@ -66,7 +66,6 @@ namespace Steam.Player
             CmdSetPlayerName(_playerSteamId == 0 ? "Oleg" : SteamFriends.GetPersonaName());
             gameObject.name = "LocalPlayer";
             LobbyController.SetLocalPlayer(this);
-            LobbyController.UpdateLobbyName();
         }
 
         /// <summary>
@@ -80,7 +79,6 @@ namespace Steam.Player
             Debug.Log("OnStartClient");
             DontDestroyOnLoad(gameObject);
             Room.LobbyPlayers.Add(this);
-            LobbyController.UpdateLobbyName();
             LobbyController.UpdatePlayerList();
         }
 

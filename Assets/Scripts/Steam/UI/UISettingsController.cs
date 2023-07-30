@@ -11,17 +11,17 @@ namespace Steam.UI
         [Header("Vars")]
         [SerializeField] private FloatVariable _mouseSensitivity;
         
-        private const string Sensitivity = "sensitivity";
+        private const string KeySensitivity = "sensitivity";
         
         private void Awake()
         {
-            var sensitivity = PlayerPrefs.GetFloat(Sensitivity);
+            var sensitivity = PlayerPrefs.GetFloat(KeySensitivity);
             if(sensitivity != 0) _mouseSensitivity.Value = sensitivity;
             _mouseSensitivityInputField.text = _mouseSensitivity.Value.ToString();
             _mouseSensitivityInputField.onValueChanged.AddListener(value =>
             {
                 float.TryParse(value, out var sensitivity);
-                PlayerPrefs.SetFloat(Sensitivity, sensitivity);
+                PlayerPrefs.SetFloat(KeySensitivity, sensitivity);
                 _mouseSensitivity.Value = sensitivity;
             });
         }

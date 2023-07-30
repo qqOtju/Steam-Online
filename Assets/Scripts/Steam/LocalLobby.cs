@@ -1,5 +1,6 @@
 ﻿using Mirror;
 using MyMirror;
+using Steam.Level;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -13,6 +14,10 @@ namespace Steam
         [Header("Other")]
         [SerializeField] [Scene] private string _menuScene = null;
         [SerializeField] private MyNetworkManager _networkManager;
+        
+        private SOLevelInfo _levelInfo;
+
+        public void SetLevel(SOLevelInfo levelInfo) => _levelInfo = levelInfo;
         
         public void HostLobby()
         {
@@ -31,7 +36,7 @@ namespace Steam
         public void StartGame()
         {
             if (SceneManager.GetActiveScene().name == _menuScene.SceneName())
-                _networkManager.ServerChangeScene("Scene_Map_01");
+                _networkManager.ServerChangeScene(_levelInfo.LevelScene.SceneName());
         }
         
         /*public void LeaveLobby()

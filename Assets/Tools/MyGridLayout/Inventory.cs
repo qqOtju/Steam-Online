@@ -44,7 +44,7 @@ namespace GridLayout
         {
             if(ColumnNum == columnCount && RowNum + 1 >= rowCount)
                 throw new ArgumentOutOfRangeException();
-            var item = Instantiate(itemPrefab, GridTransform);
+            var item = Instantiate(itemPrefab, transform);
             var itemRect = item.GetComponent<RectTransform>();
             var col = ColumnNum;
             var row = RowNum;
