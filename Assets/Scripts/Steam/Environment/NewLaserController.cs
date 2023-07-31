@@ -16,6 +16,7 @@ namespace Steam.Environment
         [SerializeField] private Transform[] _movePositions;
         [SerializeField] private float _moveTime = 2f;
         [SerializeField] private LayerMask _ignore;
+        [SerializeField] private ParticleSystem _particle;
         
         private const int MaxDistance = 100;
 
@@ -40,6 +41,7 @@ namespace Steam.Environment
             if (Physics.Raycast(_startTransform.position, _startTransform.forward, out var hit, MaxDistance, _ignore))
             {
                 var position = _startTransform.position;
+                _particle.transform.position = hit.point;
                 var distance = Vector3.Distance(position, hit.point) / 2;
                 _laserTransform.position = Vector3.Lerp(position, hit.point, 0.5f);
                 var localScale = new Vector3(_scale.x, distance, _scale.z);

@@ -40,15 +40,25 @@ namespace Steam.Player
         [SerializeField] private Transform _cameraTarget;
         [SerializeField] private GameObject _meshContainer;
         [SerializeField] private AnimationCurve _movementCurve;
+        [SerializeField] private ParticleSystem _movementParticle;
+        [SerializeField] private ParticleSystem _punchParticle;
+        [SerializeField] private ParticleSystem _landParticle;
 
         #endregion
 
-        [SyncVar(hook = nameof(UpdateHealthValue))] private float _syncHealth;
+        [HideInInspector] [SyncVar] public int idNumber;
+        [HideInInspector] [SyncVar] public string nickname;
+        [SyncVar(hook = nameof(UpdateHealthValue))] 
+        private float _syncHealth;
 
         private readonly int _animGrounded = Animator.StringToHash("Grounded");
         private readonly int _animSpeed = Animator.StringToHash("Speed");
         private const int YPunchPower = 3;
+        private const int RunRate = 60;
+        private const int Rate = 10;
 
+        private ParticleStatus _particleStatus = ParticleStatus.NotEmmit;
+        private ParticleSystem.EmissionModule _movementEmission;
         private readonly WaitForSeconds _wfs = new(0.5f);
         private PlayerMovementController _movement;
         private NetworkAnimator _networkAnimator;
@@ -59,10 +69,7 @@ namespace Steam.Player
         private Vector2 _input;
         
         public event Action<NetworkBehaviour> OnPlayerDeath;
-        public int index;
-        
-        [SyncVar] public int idNumber;
-        [SyncVar] public string nickname;
+        [HideInInspector] public int index;
 
         public void Init(int id, string nickname)
         {
@@ -116,6 +123,7 @@ namespace Steam.Player
             _rb = GetComponent<Rigidbody>();
             _animator = GetComponent<Animator>();
             _networkAnimator = GetComponent<NetworkAnimator>();
+            _movementEmission = _movementParticle.emission;
             _movement = new(_rb, _cameraTarget.gameObject,
                 _meshContainer, _rotationSmoothTime, _movementCurve);
             StartCoroutine(WaitReady());
@@ -146,6 +154,7 @@ namespace Steam.Player
         {
             if (!isOwned || !NetworkClient.ready || !GroundedCheck()) return;
             _animator.SetBool(_animGrounded, _isGrounded.Value);
+            if(_isGrounded.Value) _landParticle.Play();
         }
 
         [ClientCallback]
@@ -153,8 +162,41 @@ namespace Steam.Player
         {
             if (!isOwned && !NetworkClient.ready) return;
             Move();
-            if (_input == Vector2.zero) _animator.SetFloat(_animSpeed, 0);
-            else _animator.SetFloat(_animSpeed, _rb.velocity.magnitude);
+            if (_input == Vector2.zero)
+            {
+                if(_particleStatus is ParticleStatus.Running or ParticleStatus.Walking)
+                {
+                    _particleStatus = ParticleStatus.NotEmmit;
+                    _movementParticle.Stop();
+                }
+                _animator.SetFloat(_animSpeed, 0);
+            }
+            else
+            {
+                if(_particleStatus == ParticleStatus.NotEmmit && _isGrounded.Value)
+                {
+                    _movementEmission.rateOverTime = _isSprinting.Value ? RunRate : Rate;
+                    _particleStatus = _isSprinting.Value ? ParticleStatus.Running : ParticleStatus.Walking;
+                    _movementParticle.Play();
+                }
+                switch (_isGrounded.Value)
+                {
+                    case true when _particleStatus == ParticleStatus.Walking && _isSprinting:
+                        _movementEmission.rateOverTime = _isSprinting.Value ? RunRate : Rate;
+                        _particleStatus = _isSprinting.Value ? ParticleStatus.Running : ParticleStatus.Walking;
+                        break;
+                    case true when _particleStatus == ParticleStatus.Running && !_isSprinting:
+                        _movementEmission.rateOverTime = _isSprinting.Value ? RunRate : Rate;
+                        _particleStatus = _isSprinting.Value ? ParticleStatus.Running : ParticleStatus.Walking;
+                        break;
+                }
+                if (_particleStatus is ParticleStatus.Running or ParticleStatus.Walking && !_isGrounded.Value)
+                {
+                    _particleStatus = ParticleStatus.NotEmmit;
+                    _movementParticle.Stop();
+                }
+                _animator.SetFloat(_animSpeed, _rb.velocity.magnitude);
+            }
         }
 
         #endregion
@@ -224,6 +266,7 @@ namespace Steam.Player
             if (Physics.Raycast(transform.position, _meshContainer.transform.forward, out var ray, 2f))
                 if (ray.collider.gameObject.TryGetComponent<GamePlayerController>(out var player))
                 {
+                    _punchParticle.Play();
                     CmdPushPlayer(player, _meshContainer.transform.forward);
                     Push(player.GetComponent<Rigidbody>(), _meshContainer.transform.forward * 2);
                 }
@@ -266,5 +309,12 @@ namespace Steam.Player
         }
 
         #endregion
+    }
+
+    public enum ParticleStatus
+    {
+        NotEmmit,
+        Running,
+        Walking
     }
 }
