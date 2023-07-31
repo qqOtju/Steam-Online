@@ -23,7 +23,6 @@ namespace Steam.Player
         [SerializeField] private FloatConstant _airSpeed;
         [SerializeField] private FloatConstant _airSprintSpeed;
         [SerializeField] private FloatConstant _jumpHeight;
-        [SerializeField] private FloatConstant _punchPower;
         [Header("Atom variables")] 
         [SerializeField] private FloatVariable _currentH;
         [SerializeField] private BoolVariable _isGrounded;
@@ -41,7 +40,6 @@ namespace Steam.Player
         [SerializeField] private GameObject _meshContainer;
         [SerializeField] private AnimationCurve _movementCurve;
         [SerializeField] private ParticleSystem _movementParticle;
-        [SerializeField] private ParticleSystem _punchParticle;
         [SerializeField] private ParticleSystem _landParticle;
 
         #endregion
@@ -53,7 +51,6 @@ namespace Steam.Player
 
         private readonly int _animGrounded = Animator.StringToHash("Grounded");
         private readonly int _animSpeed = Animator.StringToHash("Speed");
-        private const int YPunchPower = 3;
         private const int RunRate = 60;
         private const int Rate = 10;
 
@@ -61,7 +58,6 @@ namespace Steam.Player
         private ParticleSystem.EmissionModule _movementEmission;
         private readonly WaitForSeconds _wfs = new(0.5f);
         private PlayerMovementController _movement;
-        private NetworkAnimator _networkAnimator;
         private PlayerHealthController _health;
         private Controls _controls;
         private Animator _animator;
@@ -75,22 +71,20 @@ namespace Steam.Player
         {
             idNumber = id;
             this.nickname = nickname;
-            Debug.Log($"Id: {id}| Nick: {this.nickname}");
         }
+
+        #region Network
         
         public override void OnStartAuthority()
         {
             enabled = true;
-            Debug.Log("OnStartAuthority");
             _playerIdNumber.Value = idNumber;
             _playerName.Value = nickname;
-            Debug.Log($"SO Id: {_playerIdNumber.Value}| Nick: {_playerName.Value}");
             _controls.Player.Move.performed += SetMovement;
             _controls.Player.Move.canceled += ResetMovement;
             _controls.Player.Jump.performed += Jump;
             _controls.Player.Sprint.performed += SprintChange;
             _controls.Player.Sprint.canceled += SprintChange;
-            _controls.Player.Punch.performed += Punch;
         }
 
         public override void OnStartClient()
@@ -107,6 +101,8 @@ namespace Steam.Player
             _controls.Player.Sprint.performed -= SprintChange;
             _controls.Player.Sprint.canceled -= SprintChange;
         }
+        
+        #endregion
 
         #region ClientCallback
 
@@ -122,7 +118,6 @@ namespace Steam.Player
         {
             _rb = GetComponent<Rigidbody>();
             _animator = GetComponent<Animator>();
-            _networkAnimator = GetComponent<NetworkAnimator>();
             _movementEmission = _movementParticle.emission;
             _movement = new(_rb, _cameraTarget.gameObject,
                 _meshContainer, _rotationSmoothTime, _movementCurve);
@@ -255,33 +250,6 @@ namespace Steam.Player
                 new Vector3(position.x, position.y - _groundedOffset, position.z),
                 _groundedRadius);
         }
-
-        #endregion
-
-        #region Punch
-
-        private void Punch(InputAction.CallbackContext obj)
-        {
-            if (!isOwned || !isLocalPlayer) return;
-            if (Physics.Raycast(transform.position, _meshContainer.transform.forward, out var ray, 2f))
-                if (ray.collider.gameObject.TryGetComponent<GamePlayerController>(out var player))
-                {
-                    _punchParticle.Play();
-                    CmdPushPlayer(player, _meshContainer.transform.forward);
-                    Push(player.GetComponent<Rigidbody>(), _meshContainer.transform.forward * 2);
-                }
-        }
-
-        [Command]
-        private void CmdPushPlayer(NetworkBehaviour player, Vector3 dir) =>
-            RpcGetPunched(player, _meshContainer.transform.forward);
-
-        [ClientRpc]
-        private void RpcGetPunched(NetworkBehaviour player, Vector3 dir) =>
-            Push(player.GetComponent<Rigidbody>(), dir);
-
-        private void Push(Rigidbody rb, Vector3 dir) =>
-            rb.AddForce(dir * _punchPower.Value + Vector3.up * YPunchPower, ForceMode.Impulse);
 
         #endregion
 

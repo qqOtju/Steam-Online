@@ -8,16 +8,21 @@ using UnityEngine.SceneManagement;
 
 namespace Steam
 {
-    public class SteamLobby : NetworkBehaviour
+    public class SteamLobby : MonoBehaviour
     {
         [Header("Panels")]
         [SerializeField] private GameObject _menuPanel;
         [SerializeField] private GameObject _lobbyPanel;
         [Header("Other")]
+        [SerializeField] private TextMeshProUGUI _lobbyNameText;
         [Scene] [SerializeField] private string _menuScene = null;
         [SerializeField] private MyNetworkManager _networkManager;
         
         private const string HostAddressKey = "HostAddress";
+        
+        protected Callback<GameLobbyJoinRequested_t> gameLobbyJoinRequested;
+        protected Callback<LobbyCreated_t> lobbyCreated;
+        protected Callback<LobbyEnter_t> lobbyEntered;
         
         private SOLevelInfo _currentLevel;
         public static ulong CurrentLobbyId { get; private set; }
@@ -25,10 +30,15 @@ namespace Steam
 
         private void Awake()
         {
-            Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
-            Callback<LobbyCreated_t>.Create(OnLobbyCreated);
-            Callback<LobbyEnter_t>.Create(OnLobbyEntered);
-            Callback<LobbyKicked_t>.Create(OnLobbyLeave);
+            if(!SteamManager.Initialized)
+            {
+                _lobbyNameText.gameObject.SetActive(true);
+                _lobbyNameText.text = "Steam is not initialized";
+                return;
+            }
+            gameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
+            lobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
+            lobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
         }     
         
         public void HostLobby()
@@ -48,11 +58,10 @@ namespace Steam
 
         public void LeaveLobby()
         {
-            SteamMatchmaking.LeaveLobby(LobbyId);
-            _menuPanel.gameObject.SetActive(true);
+            /*_menuPanel.gameObject.SetActive(true);
             _lobbyPanel.gameObject.SetActive(false);
             if (isServer) _networkManager.StopHost();
-            else _networkManager.StopClient();
+            else _networkManager.StopClient();*/
         }
         
         public void ExitGame() => Application.Quit();
@@ -72,7 +81,6 @@ namespace Steam
             _networkManager.StartHost();
             SteamMatchmaking.SetLobbyData(LobbyId, HostAddressKey,
                 SteamUser.GetSteamID().ToString());
-            SteamMatchmaking.SetLobbyData(LobbyId, "name", SteamFriends.GetPersonaName());
         }
         
         private void OnLobbyEntered(LobbyEnter_t callback)

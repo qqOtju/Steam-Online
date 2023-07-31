@@ -36,14 +36,12 @@ namespace Steam.Environment
                 DestroyImmediate(transform.GetChild(i).gameObject);
             var size = _collider.bounds.size;
             Debug.Log(size);
-            var zCount = (int)size.z;
-            var xCount = (int)size.x;
-            var y = transform.position.y;
-            for (int i = 0; i < zCount; i++)
+            var y = transform.position.y + 0.5f;
+            for (int i = -2; i < size.x - 2; i++)
             {
-                for (int j = 0; j < xCount; j++)
+                for (int j = 0; j < size.z; j++)
                 {
-                    var go = Instantiate(_prefab, new Vector3(j - size.x / 2, y, i - size.z / 2),
+                    var go = Instantiate(_prefab, new Vector3(i - size.z / 2, y, j - size.x / 2),
                         new Quaternion(0, 0, 0, 0),
                         transform.parent);
                     go.transform.parent = transform;
