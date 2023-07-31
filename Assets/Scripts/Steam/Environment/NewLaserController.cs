@@ -1,4 +1,5 @@
-﻿using Mirror;
+﻿using System;
+using Mirror;
 using Steam.Interface;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;
@@ -11,30 +12,37 @@ namespace Steam.Environment
         [SerializeField] private Transform _startTransform;
         [SerializeField] private GameObject _laserObj;
         [SerializeField] private float _timeBeforeDamage = 1f;
+        [SerializeField] private bool _isStatic = true;
+        [SerializeField] private Transform[] _movePositions;
+        [SerializeField] private float _moveTime = 2f;
+        [SerializeField] private LayerMask _ignore;
+        
+        private const int MaxDistance = 100;
 
+        private Vector3 _scale;
         private Transform _laserTransform;
-        private Vector3 _startPos;
         private bool _damaging;
         private float _time;
 
         [ServerCallback]
-        private void Awake()
+        private void Start()
         {
             _laserTransform = _laserObj.transform;
-            _startPos = _startTransform.position;
+            _scale = _laserObj.transform.lossyScale;
+            if(!_isStatic)
+                Move(0);
         }
 
         [ServerCallback]
         private void FixedUpdate()
         {
-            if(_damaging)
-                _time += Time.deltaTime;
-            if (Physics.Raycast(_startTransform.position, _startTransform.forward, out var hit))
+            if(_damaging) _time += Time.deltaTime;
+            if (Physics.Raycast(_startTransform.position, _startTransform.forward, out var hit, MaxDistance, _ignore))
             {
-                var distance = Vector3.Distance(_startPos, hit.point) / 2;
-                _laserTransform.position = Vector3.Lerp(_startPos, hit.point, 0.5f);
-                var localScale = _laserTransform.localScale;
-                localScale = new Vector3(localScale.x, distance, localScale.z);
+                var position = _startTransform.position;
+                var distance = Vector3.Distance(position, hit.point) / 2;
+                _laserTransform.position = Vector3.Lerp(position, hit.point, 0.5f);
+                var localScale = new Vector3(_scale.x, distance, _scale.z);
                 _laserTransform.localScale = localScale;
                 if (!hit.collider.TryGetComponent<IDamageable>(out var damageable)) return;
                 _damaging = true;
@@ -48,6 +56,19 @@ namespace Steam.Environment
                 _time = 0f;
                 _laserTransform.localScale = Vector3.zero;
             }
+        }
+
+        private void OnDestroy() => LeanTween.cancelAll();
+
+        private void Move(int index)
+        {
+            if (index == _movePositions.Length)
+                index = 0;
+            var startPos = transform.position;
+            var endPos = _movePositions[index].position;
+            LeanTween.value(0, 1, _moveTime).setOnUpdate(value =>
+                    transform.position = Vector3.Lerp(startPos, endPos, value)
+            ).setOnComplete(_ => Move(index + 1));
         }
     }
 }

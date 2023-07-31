@@ -1,4 +1,5 @@
-﻿using GridLayout;
+﻿using System;
+using GridLayout;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -46,6 +47,8 @@ namespace Steam.UI
             _container.Align(true);
         }
 
+        private void OnDestroy() => LeanTween.cancelAll();
+
         public void OnPointerClick(PointerEventData eventData) => Press();
 
         private void Press()
@@ -75,20 +78,16 @@ namespace Steam.UI
 
         private void Foo()
         {
-            LeanTween.value(0, 1f, FadeTime).setOnStart(() => _targetGraphic.color = _baseColor)
+            LeanTween.value(_targetGraphic.gameObject, 0, 1f, FadeTime).setOnStart(() => _targetGraphic.color = _baseColor)
                 .setOnUpdate(value => _targetGraphic.color = Color.Lerp(_baseColor, _pressColor, value)).setOnComplete(_ =>
                     {
                         _targetGraphic.color = _pressColor;
                         LeanTween.value(0, 1f, FadeTime).setOnUpdate(value =>
-                        {
-                            if (_targetGraphic != null)
-                                _targetGraphic.color = Color.Lerp(_pressColor, _baseColor, value);
-                        }).setOnComplete(_ =>
-                        {
-                            if (_targetGraphic != null)
-                                _targetGraphic.color = _baseColor;
-                        });
+                            _targetGraphic.color = Color.Lerp(_pressColor, _baseColor, value)
+                        ).setOnComplete(_ => _targetGraphic.color = _baseColor
+                        );
                     });
         }
+        
     }
 }

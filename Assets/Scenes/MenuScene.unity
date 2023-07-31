@@ -1115,6 +1115,7 @@ MonoBehaviour:
     type: 3}
   _lobbyController: {fileID: 549792302}
   _menuScene: Assets/Scenes/MenuScene.unity
+  _playersNum: {fileID: 11400000, guid: 71d9e8cd34328d847afc475687319c0a, type: 2}
   _withoutSteam: 1
 --- !u!114 &508807165
 MonoBehaviour:
@@ -1359,7 +1360,7 @@ MonoBehaviour:
   _layout: {fileID: 942213657}
   _networkManager: {fileID: 508807164}
   _steamLobby: {fileID: 0}
-  _localLobby: {fileID: 555774639999180229}
+  _localLobby: {fileID: 2069855486}
   _startBtnIcon: {fileID: 299028280}
   _startBtnText: {fileID: 1902415589}
   _startBtn: {fileID: 1655611422}
@@ -2559,7 +2560,7 @@ PrefabInstance:
     - target: {fileID: 7002581816133451274, guid: 88ef4084405a5934089b85da63593b51,
         type: 3}
       propertyPath: _onClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ExitGame
+      value: LeaveLobby
       objectReference: {fileID: 0}
     - target: {fileID: 7002581816133451274, guid: 88ef4084405a5934089b85da63593b51,
         type: 3}
@@ -3201,7 +3202,7 @@ PrefabInstance:
         type: 3}
       propertyPath: _onClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
-      objectReference: {fileID: 555774639999180229}
+      objectReference: {fileID: 2069855486}
     - target: {fileID: 7002581816133451274, guid: 88ef4084405a5934089b85da63593b51,
         type: 3}
       propertyPath: _onClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
@@ -3596,7 +3597,7 @@ PrefabInstance:
         type: 3}
       propertyPath: _onClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 555774639999180229}
+      objectReference: {fileID: 2069855486}
     - target: {fileID: 7002581816133451274, guid: 88ef4084405a5934089b85da63593b51,
         type: 3}
       propertyPath: _onClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
@@ -4192,6 +4193,54 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 2051738813}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2069855485
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2069855487}
+  - component: {fileID: 2069855486}
+  m_Layer: 0
+  m_Name: Local Lobby
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2069855486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2069855485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c92c7eece1154be2bf6126605404a801, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _menuPanel: {fileID: 120377474}
+  _lobbyPanel: {fileID: 1954963268}
+  _menuScene: Assets/Scenes/MenuScene.unity
+  _networkManager: {fileID: 508807164}
+--- !u!4 &2069855487
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2069855485}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2108472928
 GameObject:
   m_ObjectHideFlags: 0
@@ -4461,54 +4510,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2132411282}
   m_CullTransparentMesh: 1
---- !u!1 &555774639999180226
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 555774639999180228}
-  - component: {fileID: 555774639999180229}
-  m_Layer: 0
-  m_Name: Local Lobby
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &555774639999180228
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 555774639999180226}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 8
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &555774639999180229
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 555774639999180226}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c92c7eece1154be2bf6126605404a801, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _menuPanel: {fileID: 120377474}
-  _lobbyPanel: {fileID: 1954963268}
-  _menuScene: Assets/Scenes/MenuScene.unity
-  _networkManager: {fileID: 508807164}
 --- !u!1001 &2809186967066586720
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4655,7 +4656,7 @@ PrefabInstance:
         type: 3}
       propertyPath: _onClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 555774639999180229}
+      objectReference: {fileID: 2069855486}
     - target: {fileID: 7002581816133451274, guid: 88ef4084405a5934089b85da63593b51,
         type: 3}
       propertyPath: _onClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState

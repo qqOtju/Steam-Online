@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using Mirror;
-using Steam.Event;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -9,7 +7,7 @@ namespace Steam.Environment
 {
     [SelectionBase]
     [RequireComponent(typeof(Animator))]
-    public class DoorController : SubscribeObject
+    public class DoorController : MonoBehaviour
     {
         [SerializeField] private float _openTime = 1.0f;
         [SerializeField] private bool _singleUse = false;
@@ -26,11 +24,6 @@ namespace Steam.Environment
             _animator = GetComponent<Animator>();
             CloseDoor();
         }
-
-        [Server]
-        public override void Subscribe(ref Action action) => 
-            action += () => _subscribeEvent?.Invoke();
-
 
         public void Door()
         {

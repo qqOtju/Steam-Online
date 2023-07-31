@@ -59,6 +59,12 @@ MonoBehaviour:
   _startTransform: {fileID: 5319202992296372010}
   _laserObj: {fileID: 7285548839018973594}
   _timeBeforeDamage: 0.05
+  _isStatic: 1
+  _movePositions: []
+  _moveTime: 2
+  _ignore:
+    serializedVersion: 2
+    m_Bits: 1011
 --- !u!114 &5319202991269859105
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -427,7 +433,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5319202992296372011}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.5}
+  m_LocalPosition: {x: 0, y: 0, z: 0.53}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -447,7 +453,7 @@ GameObject:
   - component: {fileID: 5689688465229638724}
   - component: {fileID: 6484599846281425625}
   - component: {fileID: 2504561665023408666}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Laser obj
   m_TagString: Untagged
   m_Icon: {fileID: 0}

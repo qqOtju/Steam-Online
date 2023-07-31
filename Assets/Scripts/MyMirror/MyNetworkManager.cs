@@ -5,6 +5,7 @@ using Steam;
 using Steam.Player;
 using Steam.UI;
 using Steamworks;
+using UnityAtoms.BaseAtoms;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -17,6 +18,7 @@ namespace MyMirror
         [SerializeField] private GamePlayerController _gamePlayerPrefab;
         [SerializeField] private UILobbyController _lobbyController;
         [SerializeField] [Scene] private string _menuScene = null;
+        [SerializeField] private IntVariable _playersNum;
         [SerializeField] private bool _withoutSteam;
         public event Action<NetworkConnectionToClient> OnSceneChange; 
         public List<LobbyPlayerController> LobbyPlayers { get; } = new();
@@ -37,6 +39,7 @@ namespace MyMirror
         {
             if (SceneManager.GetActiveScene().name == _menuScene.SceneName() && newSceneName.StartsWith("Scene_Map"))
             {
+                _playersNum.Value = LobbyPlayers.Count;
                 for (int i = LobbyPlayers.Count - 1; i >= 0; i--)
                 {
                     var conn = LobbyPlayers[i].connectionToClient;

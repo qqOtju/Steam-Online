@@ -1,36 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using Mirror;
-using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine;
 
 namespace Steam.Level
 {
     public class LevelController : MonoBehaviour
     {
-        [SerializeField] private List<LevelEvent> _events;
-
-        [Server]        
-        public void Add(int index)
-        {
-            var levelEvent = _events[index];
-            Debug.Log($"{levelEvent.MaxCount}");
-            levelEvent.Add();
-            if(levelEvent.Count == levelEvent.MaxCount)
-                levelEvent.Event?.Invoke();
-        }
-    }
-
-    [Serializable]
-    public class LevelEvent
-    {
-        [SerializeField] private int _count;
-        [SerializeField] private UnityEvent _event;
-        private int _currentCount;
+        [SerializeField] private Connection[] _connection;
         
-        public int Count => _currentCount;
-        public int MaxCount => _count;
-        public UnityEvent Event => _event;
-        public void Add() => _currentCount++;
+        private void Awake()
+        {
+            foreach (var connection in _connection)
+            {
+                var conn = connection;
+                foreach (var trigger in conn.triggers)
+                {
+                    trigger.Register(value =>
+                    {
+                        if (value) conn.currentTriggers++;
+                        else conn.currentTriggers--;
+                        if(conn.currentTriggers == conn.triggersCount)
+                            conn.events?.Invoke();
+                    });
+                }
+            }
+        }
     }
 }

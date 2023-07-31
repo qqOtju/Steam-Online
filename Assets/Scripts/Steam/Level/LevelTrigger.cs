@@ -1,18 +1,20 @@
 ﻿using Mirror;
 using MyMirror;
-using System.Collections;
+using UnityAtoms.BaseAtoms;
 using UnityEngine;
 
-namespace Assets.Scripts.Steam.Level
+namespace Steam.Level
 {
     [SelectionBase]
     [RequireComponent(typeof(Collider))]
     public class LevelTrigger : MonoBehaviour
     {
         [SerializeField] [Scene] private string _nextScene;
+        [SerializeField] private IntVariable _playersNum;
 
         private MyNetworkManager _networkManager;
         private bool _sceneChange;
+        private int _stayingPlayers;
 
         private MyNetworkManager Manager
         {
@@ -26,11 +28,22 @@ namespace Assets.Scripts.Steam.Level
         [Server]
         private void OnTriggerEnter(Collider other)
         {
-            if (!_sceneChange && other.CompareTag("Player"))
+            if(other.CompareTag("Player"))
             {
-                _sceneChange = true;
-                Manager.ServerChangeScene(_nextScene.SceneName());    
+                _stayingPlayers++;
+                if (!_sceneChange && _stayingPlayers == _playersNum.Value)
+                {
+                    _sceneChange = true;
+                    Manager.ServerChangeScene(_nextScene.SceneName());
+                }
             }
+        }
+
+        [Server]
+        private void OnTriggerExit(Collider other)
+        {
+            if(other.CompareTag("Player"))
+                _stayingPlayers--;
         }
     }
 }

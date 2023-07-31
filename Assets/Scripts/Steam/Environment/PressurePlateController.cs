@@ -1,30 +1,29 @@
 ﻿using Mirror;
-using Steam.Event;
+using UnityAtoms.BaseAtoms;
 using UnityEngine;
 
 namespace Steam.Environment
 {
     [SelectionBase]
     [RequireComponent(typeof(Collider))]
-    public class PressurePlateController : RaiseObject
+    public class PressurePlateController : MonoBehaviour
     {
-        [SerializeField] private bool _singleUse;
-        private bool _used;
-        
-        [ServerCallback]
+        [SerializeField] private BoolEvent _triggerEvent;
+        [SerializeField] private ParticleSystem _particle;
+
+            [ServerCallback]
         private void OnTriggerEnter(Collider other)
         {
-            if(_singleUse)
-            {
-                if (_used || !other.CompareTag("Player")) return;
-                _used = true;
-                Raise();
-            }
-            else if (other.CompareTag("Player"))
-            {
-                _used = true;
-                Raise();
-            }
+            if(!other.CompareTag("Player")) return;
+            _triggerEvent.Raise(true);
+            _particle.Play();
+        }
+
+        [ServerCallback]
+        private void OnTriggerExit(Collider other)
+        {
+            if(!other.CompareTag("Player")) return;
+            _triggerEvent.Raise(false);
         }
     }
 }
