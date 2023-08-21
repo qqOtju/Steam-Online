@@ -1,4 +1,4 @@
-﻿namespace Steam.Interface
+﻿namespace Steam.Interfaces
 {
     public interface IDamageable
     {

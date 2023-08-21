@@ -11,7 +11,7 @@ namespace Steam.Environment
         [SerializeField] private BoolEvent _triggerEvent;
         [SerializeField] private ParticleSystem _particle;
 
-            [ServerCallback]
+        [ServerCallback]
         private void OnTriggerEnter(Collider other)
         {
             if(!other.CompareTag("Player")) return;

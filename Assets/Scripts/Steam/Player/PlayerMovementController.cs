@@ -31,35 +31,18 @@ namespace Steam.Player
             _rb.velocity = new Vector3(vel.x, velocity, vel.z);
         }
 
-        /// <summary>
-        /// Function that is called in the Update method of the PlayerController
-        /// </summary>
-        public void MoveUpdate(Vector2 inputValue, float speed, float sprintSpeed, float airSpeed, float airSprintSpeed, bool isGrounded, bool isSprinting)
-        {
-            Move(inputValue, isGrounded, isSprinting, speed, sprintSpeed, airSpeed, airSprintSpeed);
-            RotateModel(inputValue);
-        }
-
-        /// <summary>
-        /// Moves the player based on the input value
-        /// </summary>
-        private void Move(Vector2 inputValue, bool isGrounded, bool isSprinting, float speed, float sprintSpeed,
-            float airSpeed, float airSprintSpeed)
+        public void Move(Vector2 inputValue, float speed)
         {
             var forceDir = inputValue.y * GetCameraForward(_targetTransform);
             forceDir += inputValue.x * GetCameraRight(_targetTransform);
             if (inputValue == Vector2.zero) _movementValue = 0;
             else _movementValue += Time.deltaTime;
-            Vector3 velocity;
-            if (isGrounded)
-                velocity = forceDir * ((isSprinting ? sprintSpeed : speed) * _movementCurve.Evaluate(_movementValue));
-            else
-                velocity = forceDir * ((isSprinting ? airSprintSpeed : airSpeed) * _movementCurve.Evaluate(_movementValue));
-
+            var velocity = forceDir * (speed * _movementCurve.Evaluate(_movementValue));
             velocity.y = _rb.velocity.y;
-            
             _rb.velocity = velocity;
         }
+
+        #region Camera
 
         /// <summary>
         /// Returns the forward direction of the camera
@@ -79,12 +62,14 @@ namespace Steam.Player
             var right = target.right;
             right.y = 0;
             return right.normalized;
-        }
+        }        
+
+        #endregion
         
         /// <summary>
         /// Smoothly rotates the model to face the direction of movement
         /// </summary>
-        private void RotateModel(Vector2 inputValue)
+        public void RotateModel(Vector2 inputValue)
         {
             if(inputValue == Vector2.zero) return;
             var inputDirection = new Vector3(inputValue.x, 0, inputValue.y).normalized;

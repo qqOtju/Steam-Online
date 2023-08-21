@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using Mirror;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace Steam.Environment
 {
@@ -11,7 +10,7 @@ namespace Steam.Environment
     {
         [SerializeField] private float _openTime = 1.0f;
         [SerializeField] private bool _singleUse = false;
-        [SerializeField] private UnityEvent _subscribeEvent;
+        
         private readonly int _value = Animator.StringToHash("Value");
         private Animator _animator;
         private bool _isActivated;

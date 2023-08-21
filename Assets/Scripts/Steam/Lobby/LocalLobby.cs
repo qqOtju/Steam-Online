@@ -1,10 +1,11 @@
-﻿using Mirror;
+﻿using Extensions;
+using Mirror;
 using MyMirror;
 using Steam.Level;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Steam
+namespace Steam.Lobby
 {
     public class LocalLobby : MonoBehaviour
     {

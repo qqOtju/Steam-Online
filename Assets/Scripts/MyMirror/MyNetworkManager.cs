@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Extensions;
 using Mirror;
 using Steam;
+using Steam.Lobby;
 using Steam.Player;
 using Steam.UI;
 using Steamworks;

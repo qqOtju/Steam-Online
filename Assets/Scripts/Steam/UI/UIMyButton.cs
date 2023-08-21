@@ -1,5 +1,4 @@
-﻿using System;
-using GridLayout;
+﻿using GridLayout;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;

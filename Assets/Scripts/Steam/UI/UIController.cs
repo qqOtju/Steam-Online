@@ -1,5 +1,4 @@
-﻿using System;
-using InputSystem;
+﻿using InputSystem;
 using TMPro;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;

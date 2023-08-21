@@ -44,19 +44,6 @@ namespace Steam.Player
 
         #region NetworkCallbacks
 
-        /*
-        * Когда я создаю лобби создается новый экзепляр этого класса (объекта) и посколько я имею над этим объектом власть (authority),
-        * то у меня вызывается метод OnStartAuthority() и OnStartClient(), но когда ко мне подключается игрок, например Данил, то создается
-        * экзепляр класса (объекта) над которым я не имею власти (authority) и у него вызывается только OnStartClient().
-        *
-        * Когда создается класс (объект) над которым у меня есть власть он отправляет команду CmdSetPlayerName() на сервер, эта команда вызывает
-        * метод PlayerNameUpdate() в котором есть проверка на то этот метод происходит на сервере или на клиенте, если на сервере то переменной
-        * _playerName устанавливается новое значение, а если на клиенте то обновляется интерфейс лобби. Не стоит забывать, что при смене значения
-        * переменной _playerName срабатывает хук с тем же методом PlayerNameUpdate(), что означает, что при отправке команды CmdSetPlayerName() метод
-        * PlayerNameUpdate() сработает 2 раза 1 раз на сервера другой раз на клиенте. Важно понимать, чтобы сработал хук на SyncVar переменная должна поменять
-        * ИМЕННО НА СЕРВЕРЕ.
-        */
-
         /// <summary>
         /// Like Start(), but only called for objects the client has authority over.
         /// Means called only on the local player.
@@ -81,8 +68,7 @@ namespace Steam.Player
             Room.LobbyPlayers.Add(this);
             LobbyController.UpdatePlayerList();
         }
-
-
+        
         public override void OnStopClient()
         {
             Room.LobbyPlayers.Remove(this);

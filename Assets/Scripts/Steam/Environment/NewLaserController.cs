@@ -1,27 +1,29 @@
-﻿using System;
-using Mirror;
-using Steam.Interface;
-using UnityAtoms.BaseAtoms;
+﻿using Mirror;
+using Steam.Interfaces;
 using UnityEngine;
 
 namespace Steam.Environment
 {
+    [SelectionBase]
     public class NewLaserController : NetworkBehaviour
     {
-        [SerializeField] private FloatConstant _laserDamage;
-        [SerializeField] private Transform _startTransform;
-        [SerializeField] private GameObject _laserObj;
+        [Header("Values")]
+        [SerializeField] private float _laserDamage = 0.5f;
         [SerializeField] private float _timeBeforeDamage = 1f;
-        [SerializeField] private bool _isStatic = true;
-        [SerializeField] private Transform[] _movePositions;
         [SerializeField] private float _moveTime = 2f;
+        [Header("Movement")]
+        [SerializeField] private bool _isStatic = true;
+        [SerializeField] private Transform _startTransform;
+        [SerializeField] private Transform[] _movePositions;
+        [Header("Other")]
+        [SerializeField] private GameObject _laserObj;
         [SerializeField] private LayerMask _ignore;
         [SerializeField] private ParticleSystem _particle;
         
         private const int MaxDistance = 100;
 
-        private Vector3 _scale;
         private Transform _laserTransform;
+        private Vector3 _scale;
         private bool _damaging;
         private float _time;
 
@@ -50,7 +52,7 @@ namespace Steam.Environment
                 _damaging = true;
                 if (!(_time >= _timeBeforeDamage)) return;
                 _time = 0f;
-                damageable.GetDamage(_laserDamage.Value);
+                damageable.GetDamage(_laserDamage);
             }
             else
             {
@@ -69,7 +71,7 @@ namespace Steam.Environment
             var startPos = transform.position;
             var endPos = _movePositions[index].position;
             LeanTween.value(0, 1, _moveTime).setOnUpdate(value =>
-                    transform.position = Vector3.Lerp(startPos, endPos, value)
+                transform.position = Vector3.Lerp(startPos, endPos, value)
             ).setOnComplete(_ => Move(index + 1));
         }
     }

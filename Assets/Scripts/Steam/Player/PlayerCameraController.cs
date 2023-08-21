@@ -37,10 +37,7 @@ namespace Steam.Player
 
         [ClientCallback]
         private void Awake() => _controls = new();
-
-        /// <summary>
-        /// ClientCallback because server dont have input
-        /// </summary>
+        
         [ClientCallback]
         private void OnEnable() => _controls.Enable();
 

@@ -1,13 +1,14 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Steam.Player
 {
     public class PlayerHealthController
     {
-        public event Action OnDeath;
-
         private readonly float _maxHealth;
+        
         private float _currentHealth;
+        public event Action OnDeath;
 
         public PlayerHealthController(float maxHealth)
         {
@@ -17,27 +18,12 @@ namespace Steam.Player
 
         public float GetDamage(float dmg)
         {
+            _currentHealth = Mathf.Max(0, _currentHealth - dmg);
             if(_currentHealth <= 0)
-                return _currentHealth;
-            if(_currentHealth - dmg <= 0)
-            {
-                _currentHealth -= dmg;
                 OnDeath?.Invoke();
-            }
-            else
-                _currentHealth -= dmg;
             return _currentHealth;
         }
 
-        public float GetHeal(float heal)
-        {
-            if(_currentHealth >= _maxHealth)
-                return _currentHealth;
-            if(_currentHealth + heal >= _maxHealth)
-                _currentHealth = _maxHealth;
-            else
-                _currentHealth += heal;
-            return _currentHealth;
-        }
+        public float GetHeal(float heal) => _currentHealth = Mathf.Min(_maxHealth, _currentHealth + heal);
     }
 }

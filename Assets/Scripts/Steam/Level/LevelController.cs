@@ -13,15 +13,17 @@ namespace Steam.Level
                 var conn = connection;
                 foreach (var trigger in conn.triggers)
                 {
-                    trigger.Register(value =>
-                    {
-                        if (value) conn.currentTriggers++;
-                        else conn.currentTriggers--;
-                        if(conn.currentTriggers == conn.triggersCount)
-                            conn.events?.Invoke();
-                    });
+                    trigger.Register(value => OnTrigger(conn, value));
                 }
             }
+        }
+
+        private void OnTrigger(Connection conn ,bool value)
+        {
+            if (value) conn.currentTriggers++;
+            else conn.currentTriggers--;
+            if(conn.currentTriggers == conn.triggersCount)
+                conn.events?.Invoke();
         }
     }
 }

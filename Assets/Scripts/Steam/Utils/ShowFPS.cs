@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Steam
+namespace Steam.Utils
 {
     public class ShowFPS : MonoBehaviour {
  

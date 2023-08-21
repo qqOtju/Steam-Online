@@ -1,5 +1,4 @@
 ﻿using Mirror;
-using Steam.Interface;
 using Steam.Player;
 using UnityEngine;
 
@@ -13,7 +12,6 @@ namespace Steam.Environment
         [SerializeField] private float _damage = 50f;
         [SerializeField] private GameObject _prefab;
         [SerializeField] private Collider _collider;
-        [SerializeField] private bool _upd = false;
 
         private void OnTriggerEnter(Collider other)
         {
@@ -30,7 +28,7 @@ namespace Steam.Environment
             player.GetDamage(_damage);
 
         [ContextMenu("Set Spikes")]
-        private void Upd()
+        private void SetSpikes()
         {
             for (int i = 0; i < transform.childCount; i++)
                 DestroyImmediate(transform.GetChild(i).gameObject);
@@ -47,11 +45,6 @@ namespace Steam.Environment
                     go.transform.parent = transform;
                 }
             }
-        }
-        
-        private void Update()
-        {
-            if(_upd && !Application.isPlaying) Upd();
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections;
 using InputSystem;
 using Mirror;
 using Mirror.Experimental;
-using Steam.Interface;
+using Steam.Interfaces;
 using UnityAtoms.BaseAtoms;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -39,7 +39,6 @@ namespace Steam.Player
         [SerializeField] private Transform _cameraTarget;
         [SerializeField] private GameObject _meshContainer;
         [SerializeField] private AnimationCurve _movementCurve;
-        [SerializeField] private ParticleSystem _movementParticle;
         [SerializeField] private ParticleSystem _landParticle;
 
         #endregion
@@ -51,11 +50,7 @@ namespace Steam.Player
 
         private readonly int _animGrounded = Animator.StringToHash("Grounded");
         private readonly int _animSpeed = Animator.StringToHash("Speed");
-        private const int RunRate = 60;
-        private const int Rate = 10;
 
-        private ParticleStatus _particleStatus = ParticleStatus.NotEmmit;
-        private ParticleSystem.EmissionModule _movementEmission;
         private readonly WaitForSeconds _wfs = new(0.5f);
         private PlayerMovementController _movement;
         private PlayerHealthController _health;
@@ -118,7 +113,6 @@ namespace Steam.Player
         {
             _rb = GetComponent<Rigidbody>();
             _animator = GetComponent<Animator>();
-            _movementEmission = _movementParticle.emission;
             _movement = new(_rb, _cameraTarget.gameObject,
                 _meshContainer, _rotationSmoothTime, _movementCurve);
             StartCoroutine(WaitReady());
@@ -158,40 +152,10 @@ namespace Steam.Player
             if (!isOwned && !NetworkClient.ready) return;
             Move();
             if (_input == Vector2.zero)
-            {
-                if(_particleStatus is ParticleStatus.Running or ParticleStatus.Walking)
-                {
-                    _particleStatus = ParticleStatus.NotEmmit;
-                    _movementParticle.Stop();
-                }
                 _animator.SetFloat(_animSpeed, 0);
-            }
             else
-            {
-                if(_particleStatus == ParticleStatus.NotEmmit && _isGrounded.Value)
-                {
-                    _movementEmission.rateOverTime = _isSprinting.Value ? RunRate : Rate;
-                    _particleStatus = _isSprinting.Value ? ParticleStatus.Running : ParticleStatus.Walking;
-                    _movementParticle.Play();
-                }
-                switch (_isGrounded.Value)
-                {
-                    case true when _particleStatus == ParticleStatus.Walking && _isSprinting:
-                        _movementEmission.rateOverTime = _isSprinting.Value ? RunRate : Rate;
-                        _particleStatus = _isSprinting.Value ? ParticleStatus.Running : ParticleStatus.Walking;
-                        break;
-                    case true when _particleStatus == ParticleStatus.Running && !_isSprinting:
-                        _movementEmission.rateOverTime = _isSprinting.Value ? RunRate : Rate;
-                        _particleStatus = _isSprinting.Value ? ParticleStatus.Running : ParticleStatus.Walking;
-                        break;
-                }
-                if (_particleStatus is ParticleStatus.Running or ParticleStatus.Walking && !_isGrounded.Value)
-                {
-                    _particleStatus = ParticleStatus.NotEmmit;
-                    _movementParticle.Stop();
-                }
                 _animator.SetFloat(_animSpeed, _rb.velocity.magnitude);
-            }
+            
         }
 
         #endregion
@@ -216,11 +180,14 @@ namespace Steam.Player
 
 
         [Client]
-        private void Move() =>
-            _movement.MoveUpdate(_input, _speed.Value,
-                _sprintSpeed.Value * 2, _airSpeed.Value, _airSprintSpeed.Value * 2, _isGrounded.Value,
-                _isSprinting.Value);
-
+        private void Move()
+        {
+            if(_isGrounded.Value)
+                _movement.Move(_input, _isSprinting.Value ? _sprintSpeed.Value : _speed.Value);
+            else
+                _movement.Move(_input, _isSprinting.Value ? _airSprintSpeed.Value : _airSpeed.Value);
+            _movement.RotateModel(_input);
+        }
         #endregion
 
         #region GroundCheck
@@ -242,9 +209,7 @@ namespace Steam.Player
         {
             Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
             Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
-
             Gizmos.color = _isGrounded.Value ? transparentGreen : transparentRed;
-
             var position = transform.position;
             Gizmos.DrawSphere(
                 new Vector3(position.x, position.y - _groundedOffset, position.z),
@@ -264,7 +229,6 @@ namespace Steam.Player
         [Command(requiresAuthority = false)]
         private void CmdHandleDeath()
         {
-            Debug.Log("CmdHandleDeath");
             OnPlayerDeath?.Invoke(this);
             if (isServer)
                 _health.GetHeal(50);
@@ -272,17 +236,9 @@ namespace Steam.Player
 
         private void UpdateHealthValue(float oldValue, float newValue) 
         { 
-            if(isOwned)
-                _currentH.Value = newValue;
+            if(isOwned) _currentH.Value = newValue;
         }
 
         #endregion
-    }
-
-    public enum ParticleStatus
-    {
-        NotEmmit,
-        Running,
-        Walking
     }
 }
