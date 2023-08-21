@@ -4,5 +4,3 @@
 ![image](https://github.com/qqOtju/Steam-Online/assets/85255089/44c1dd85-23d8-4ed0-9f7b-8c0ffb2a5e8c)
 
 ![image](https://github.com/qqOtju/Steam-Online/assets/85255089/8336faab-6812-4ba3-936b-b8c443de1905)
-
-![image](https://github.com/qqOtju/Steam-Online/assets/85255089/6962249b-78ca-4b10-8ebf-677fcd12ea5a)
