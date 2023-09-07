@@ -1,5 +1,4 @@
-﻿using System;
-using Extensions;
+﻿using Extensions;
 using Mirror;
 using MyMirror;
 using Steam.Level;
@@ -60,9 +59,11 @@ namespace Steam.Lobby
             SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, _networkManager.maxConnections);
         }
         
+        //ToDo переробити цей жах
         private void LeaveLobby()
         {
             if(!LobbyId.IsLobby()) return;
+            Cursor.lockState = CursorLockMode.None;
             SteamMatchmaking.LeaveLobby(LobbyId);
             _networkManager.Leave();
             Destroy(_networkManager.gameObject);

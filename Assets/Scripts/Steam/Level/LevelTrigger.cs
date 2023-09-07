@@ -7,11 +7,14 @@ using UnityEngine;
 namespace Steam.Level
 {
     [SelectionBase]
+    [RequireComponent(typeof(Collider))]
     public class LevelTrigger : MonoBehaviour
     {
         [SerializeField] [Scene] private string _nextScene;
         [SerializeField] private IntVariable _playersNum;
-
+        [SerializeField] private bool _leaveLobby;
+        [SerializeField] private VoidEvent _onLobbyLeave;
+        
         private MyNetworkManager _networkManager;
         private bool _sceneChange;
         private int _stayingPlayers;
@@ -28,15 +31,15 @@ namespace Steam.Level
         [Server]
         private void OnTriggerEnter(Collider other)
         {
-            if(other.CompareTag("Player"))
-            {
-                _stayingPlayers++;
-                if (!_sceneChange && _stayingPlayers == _playersNum.Value)
-                {
-                    _sceneChange = true;
-                    Manager.ServerChangeScene(_nextScene.SceneName());
-                }
-            }
+            if (!other.CompareTag("Player")) return;
+            Debug.Log("OnTriggerEnter");
+            _stayingPlayers++;
+            if (_sceneChange || _stayingPlayers != _playersNum.Value) return;
+            _sceneChange = true;
+            if(_leaveLobby)
+                _onLobbyLeave.Raise();
+            else
+                Manager.ServerChangeScene(_nextScene.SceneName());
         }
 
         [Server]

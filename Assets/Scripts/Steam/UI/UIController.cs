@@ -53,6 +53,7 @@ namespace Steam.UI
         private void OnDestroy()
         {
             _controls.Player.Escape.performed -= OnEscapePerformed;
+            _onHealthChange.Unregister(UpdateHealthBar);
             _playerStatus.OnDestroy();
         }
         private void OnEnable() => _controls.Enable();

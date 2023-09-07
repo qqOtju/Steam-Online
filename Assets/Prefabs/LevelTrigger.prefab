@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8943422526486349906}
   - component: {fileID: 8943422526486349911}
   - component: {fileID: 8943422526486349904}
-  - component: {fileID: 8943422526486349905}
   m_Layer: 9
   m_Name: Trigger
   m_TagString: Untagged
@@ -84,19 +83,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &8943422526486349905
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8943422526486349907}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8943422526635901168
 GameObject:
   m_ObjectHideFlags: 0
@@ -108,6 +94,7 @@ GameObject:
   - component: {fileID: 8943422526635901175}
   - component: {fileID: 8943422526635901173}
   - component: {fileID: 8943422526635901172}
+  - component: {fileID: 1815209912704486025}
   m_Layer: 9
   m_Name: LevelTrigger
   m_TagString: Untagged
@@ -145,6 +132,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _nextScene: Assets/Scenes/Scene_Map_02.unity
   _playersNum: {fileID: 11400000, guid: 71d9e8cd34328d847afc475687319c0a, type: 2}
+  _leaveLobby: 0
+  _onLobbyLeave: {fileID: 11400000, guid: a18b954cdf2c0bb44bcead58a945e45a, type: 2}
 --- !u!33 &8943422526635901172
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -153,3 +142,16 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8943422526635901168}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &1815209912704486025
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8943422526635901168}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
