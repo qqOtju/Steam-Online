@@ -7,7 +7,6 @@ using UnityEngine;
 namespace Steam.Level
 {
     [SelectionBase]
-    [RequireComponent(typeof(Collider))]
     public class LevelTrigger : MonoBehaviour
     {
         [SerializeField] [Scene] private string _nextScene;

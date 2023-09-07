@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca086da51191498c8b3d0e9d6145b056, type: 3}
+  m_Name: Player Data
+  m_EditorClassIdentifier: 
+  _maxHealth: {fileID: 11400000, guid: 29ab1275b7dfe8d4890f05296ae1e925, type: 2}
+  _currentH: {fileID: 11400000, guid: d5edb547aba68df479a499438b6643a5, type: 2}
+  _isGrounded: {fileID: 11400000, guid: 85a5cacdda24482419a894322d20a647, type: 2}
+  _isSprinting: {fileID: 11400000, guid: 6ed166aebba80424f87f5167f3f17d11, type: 2}
+  _playerIdNumber: {fileID: 11400000, guid: cce85e73fa26fda4ea07aeae034273e0, type: 2}
+  _playerName: {fileID: 11400000, guid: 78c7b2395cbc60846b3b6ef5bea6fb9e, type: 2}
+  _onMenuToggle: {fileID: 11400000, guid: ce87b2ad4187f9c4291bf0f2c8e64476, type: 2}
+  _speed: 2
+  _sprintSpeed: 5
+  _airSpeed: 2
+  _airSprintSpeed: 4
+  _jumpHeight: 2
+  _rotationSmoothTime: 0.1
+  _groundedOffset: 1.2
+  _groundedRadius: 0.2
+  _groundLayers:
+    serializedVersion: 2
+    m_Bits: 320

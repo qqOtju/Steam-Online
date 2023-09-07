@@ -10,6 +10,8 @@ namespace Steam.Player
     
     public class PlayerCameraController : NetworkBehaviour
     {
+        [Header("Events")]
+        [SerializeField] private BoolEvent _onMenuToggle;
         [Header("Camera values")] 
         [SerializeField] private Vector2 _clamp;
         [SerializeField] private FloatVariable _mouseSensitivity;
@@ -25,14 +27,14 @@ namespace Steam.Player
         {
             enabled = true;
             _virtualCamera.gameObject.SetActive(true);
-            _controls.Player.Look.performed += OnLookPerformed;
-            _controls.Player.Look.canceled += OnLookPerformed;
+            Subscribe();
+            _onMenuToggle.Register(OnEscapePerformed);
         }
-
+        
         public override void OnStopAuthority()
         {
-            _controls.Player.Look.performed -= OnLookPerformed;
-            _controls.Player.Look.canceled -= OnLookPerformed;
+            Unsubscribe();
+            _onMenuToggle.Unregister(OnEscapePerformed);
         }
 
         [ClientCallback]
@@ -47,8 +49,30 @@ namespace Steam.Player
         [ClientCallback]
         private void LateUpdate() => Rotate(_input);
 
+        private void Subscribe()
+        {
+            _controls.Player.Look.performed += OnLookPerformed;
+            _controls.Player.Look.canceled += OnLookPerformed;
+        }
+
+        private void Unsubscribe()
+        {
+            _controls.Player.Look.performed -= OnLookPerformed;
+            _controls.Player.Look.canceled -= OnLookPerformed;
+        }
+        
         private void OnLookPerformed(InputAction.CallbackContext obj) => _input = obj.ReadValue<Vector2>();
 
+        private void OnEscapePerformed(bool status)
+        {
+            if(status)
+                Subscribe();
+            else
+            {
+                _input = Vector2.zero;
+                Unsubscribe();
+            }
+        }
         private void Rotate(Vector2 lookAxis)
         {
             var deltaTimeMultiplier = 1.0f;

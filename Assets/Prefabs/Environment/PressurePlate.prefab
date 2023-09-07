@@ -338,8 +338,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2577441702814216523}
-  - component: {fileID: 1164084331154526927}
   - component: {fileID: 1413182257296835671}
+  - component: {fileID: 1164084331154526927}
   m_Layer: 9
   m_Name: PressurePlate
   m_TagString: Untagged
@@ -364,19 +364,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &1164084331154526927
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5606729922458718347}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2, y: 0.1, z: 2}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1413182257296835671
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -391,6 +378,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _triggerEvent: {fileID: 11400000, guid: 840b836347f755144bed921b94b07d0d, type: 2}
   _particle: {fileID: 4039981793965030722}
+--- !u!65 &1164084331154526927
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5606729922458718347}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2, y: 0.1, z: 2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8736038715757729817
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a934ed704425ed4ea04763ae2c04ff5, type: 3}
   m_Name: First Level
   m_EditorClassIdentifier: 
-  _levelImage: {fileID: 21300000, guid: c4ef67883d845f342baf424e7350dca8, type: 3}
+  _levelImage: {fileID: 21300000, guid: 3c80a2fd11d2a17468f2e2a514326a83, type: 3}
   _levelName: First Level
   _levelScene: Assets/Scenes/Scene_Map_01.unity

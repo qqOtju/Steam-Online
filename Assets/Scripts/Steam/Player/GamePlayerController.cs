@@ -4,7 +4,7 @@ using InputSystem;
 using Mirror;
 using Mirror.Experimental;
 using Steam.Interfaces;
-using UnityAtoms.BaseAtoms;
+using Steam.Player.Data;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,34 +14,13 @@ namespace Steam.Player
     [RequireComponent(typeof(Rigidbody), typeof(Animator))]
     public class GamePlayerController : NetworkBehaviour, IHealth
     {
-        #region Serializefield
-        
-        [Header("Atom constants")] 
-        [SerializeField] private FloatConstant _maxHealth;
-        [SerializeField] private FloatConstant _speed;
-        [SerializeField] private FloatConstant _sprintSpeed;
-        [SerializeField] private FloatConstant _airSpeed;
-        [SerializeField] private FloatConstant _airSprintSpeed;
-        [SerializeField] private FloatConstant _jumpHeight;
-        [Header("Atom variables")] 
-        [SerializeField] private FloatVariable _currentH;
-        [SerializeField] private BoolVariable _isGrounded;
-        [SerializeField] private BoolVariable _isSprinting;
-        [SerializeField] private IntVariable _playerIdNumber;
-        [SerializeField] private StringVariable _playerName;
-        [Header("Variables")] 
-        [SerializeField] private float _rotationSmoothTime = 0.1f;
-        [Header("Ground Check")]
-        [SerializeField] private float _groundedOffset = 0.14f;
-        [SerializeField] private float _groundedRadius = 0.28f;
-        [SerializeField] private LayerMask _groundLayers;
-        [Header("Other")] 
+        [Header("Data")]
+        [SerializeField] private PlayerData _data;
+        [Header("References")] 
         [SerializeField] private Transform _cameraTarget;
         [SerializeField] private GameObject _meshContainer;
         [SerializeField] private AnimationCurve _movementCurve;
         [SerializeField] private ParticleSystem _landParticle;
-
-        #endregion
 
         [HideInInspector] [SyncVar] public int idNumber;
         [HideInInspector] [SyncVar] public string nickname;
@@ -73,30 +52,24 @@ namespace Steam.Player
         public override void OnStartAuthority()
         {
             enabled = true;
-            _playerIdNumber.Value = idNumber;
-            _playerName.Value = nickname;
-            _controls.Player.Move.performed += SetMovement;
-            _controls.Player.Move.canceled += ResetMovement;
-            _controls.Player.Jump.performed += Jump;
-            _controls.Player.Sprint.performed += SprintChange;
-            _controls.Player.Sprint.canceled += SprintChange;
+            _data.PlayerIdNumber.Value = idNumber;
+            _data.PlayerName.Value = nickname;
+            InputSubscribe();
+            _data.OnMenuToggle.Register(OnEscapePerformed);
         }
 
         public override void OnStartClient()
         {
-            _health = new(_maxHealth.Value);
+            _health = new(_data.MaxHealth.Value);
             _health.OnDeath += CmdHandleDeath;
         }
 
         public override void OnStopAuthority()
-        {
-            _controls.Player.Move.performed -= SetMovement;
-            _controls.Player.Move.canceled -= ResetMovement;
-            _controls.Player.Jump.performed -= Jump;
-            _controls.Player.Sprint.performed -= SprintChange;
-            _controls.Player.Sprint.canceled -= SprintChange;
+        { 
+            InputUnsubscribe();
+            _data.OnMenuToggle.Unregister(OnEscapePerformed);
         }
-        
+
         #endregion
 
         #region ClientCallback
@@ -114,7 +87,7 @@ namespace Steam.Player
             _rb = GetComponent<Rigidbody>();
             _animator = GetComponent<Animator>();
             _movement = new(_rb, _cameraTarget.gameObject,
-                _meshContainer, _rotationSmoothTime, _movementCurve);
+                _meshContainer, _data.RotationSmoothTime, _movementCurve);
             StartCoroutine(WaitReady());
         }
 
@@ -142,8 +115,8 @@ namespace Steam.Player
         private void Update()
         {
             if (!isOwned || !NetworkClient.ready || !GroundedCheck()) return;
-            _animator.SetBool(_animGrounded, _isGrounded.Value);
-            if(_isGrounded.Value) _landParticle.Play();
+            _animator.SetBool(_animGrounded, _data.IsGrounded.Value);
+            if(_data.IsGrounded.Value) _landParticle.Play();
         }
 
         [ClientCallback]
@@ -155,11 +128,29 @@ namespace Steam.Player
                 _animator.SetFloat(_animSpeed, 0);
             else
                 _animator.SetFloat(_animSpeed, _rb.velocity.magnitude);
-            
         }
-
+        
         #endregion
-
+        
+        private void InputUnsubscribe()
+        {
+            _controls.Player.Move.performed -= SetMovement;
+            _controls.Player.Move.canceled -= ResetMovement;
+            _controls.Player.Jump.performed -= Jump;
+            _controls.Player.Sprint.performed -= SprintChange;
+            _controls.Player.Sprint.canceled -= SprintChange;
+        }
+        
+                
+        private void InputSubscribe()
+        {
+            _controls.Player.Move.performed += SetMovement;
+            _controls.Player.Move.canceled += ResetMovement;
+            _controls.Player.Jump.performed += Jump;
+            _controls.Player.Sprint.performed += SprintChange;
+            _controls.Player.Sprint.canceled += SprintChange;
+        }
+        
         #region Client
 
         [Client]
@@ -172,22 +163,32 @@ namespace Steam.Player
 
         [Client]
         private void Jump(InputAction.CallbackContext obj) =>
-            _movement.Jump(_jumpHeight.Value, _isGrounded.Value);
+            _movement.Jump(_data.JumpHeight, _data.IsGrounded.Value);
 
         [Client]
         private void SprintChange(InputAction.CallbackContext obj) =>
-            _isSprinting.Value = _controls.Player.Sprint.inProgress;
+            _data.IsSprinting.Value = _controls.Player.Sprint.inProgress;
 
 
         [Client]
         private void Move()
         {
-            if(_isGrounded.Value)
-                _movement.Move(_input, _isSprinting.Value ? _sprintSpeed.Value : _speed.Value);
+            if(_data.IsGrounded.Value)
+                _movement.Move(_input, _data.IsSprinting.Value ? _data.SprintSpeed : _data.Speed);
             else
-                _movement.Move(_input, _isSprinting.Value ? _airSprintSpeed.Value : _airSpeed.Value);
+                _movement.Move(_input, _data.IsSprinting.Value ? _data.AirSprintSpeed : _data.AirSpeed);
             _movement.RotateModel(_input);
         }
+
+        [Client]
+        private void OnEscapePerformed(bool status)
+        {
+            if (status)
+                InputSubscribe();
+            else
+                InputUnsubscribe();
+        }
+        
         #endregion
 
         #region GroundCheck
@@ -196,24 +197,24 @@ namespace Steam.Player
         private bool GroundedCheck()
         {
             var position = transform.position;
-            var spherePosition = new Vector3(position.x, position.y - _groundedOffset,
+            var spherePosition = new Vector3(position.x, position.y - _data.GroundedOffset,
                 position.z);
-            var foo = Physics.CheckSphere(spherePosition, _groundedRadius, _groundLayers,
+            var foo = Physics.CheckSphere(spherePosition, _data.GroundedRadius, _data.GroundLayers,
                 QueryTriggerInteraction.Ignore);
-            if (foo == _isGrounded.Value) return false;
-            _isGrounded.Value = foo;
+            if (foo == _data.IsGrounded.Value) return false;
+            _data.IsGrounded.Value = foo;
             return true;
         }
 
         private void OnDrawGizmos()
         {
-            Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
-            Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
-            Gizmos.color = _isGrounded.Value ? transparentGreen : transparentRed;
+            var transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
+            var transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
+            Gizmos.color = _data.IsGrounded.Value ? transparentGreen : transparentRed;
             var position = transform.position;
             Gizmos.DrawSphere(
-                new Vector3(position.x, position.y - _groundedOffset, position.z),
-                _groundedRadius);
+                new Vector3(position.x, position.y - _data.GroundedOffset, position.z),
+                _data.GroundedRadius);
         }
 
         #endregion
@@ -236,7 +237,7 @@ namespace Steam.Player
 
         private void UpdateHealthValue(float oldValue, float newValue) 
         { 
-            if(isOwned) _currentH.Value = newValue;
+            if(isOwned) _data.CurrentH.Value = newValue;
         }
 
         #endregion

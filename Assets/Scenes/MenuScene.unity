@@ -2251,6 +2251,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _menuPanel: {fileID: 120377474}
   _lobbyPanel: {fileID: 1954963268}
+  _onLobbyLeave: {fileID: 11400000, guid: a18b954cdf2c0bb44bcead58a945e45a, type: 2}
   _menuScene: Assets/Scenes/MenuScene.unity
   _networkManager: {fileID: 508807164}
 --- !u!4 &980492170

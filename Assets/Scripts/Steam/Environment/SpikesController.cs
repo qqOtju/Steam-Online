@@ -31,15 +31,14 @@ namespace Steam.Environment
         private void SetSpikes()
         {
             for (int i = 0; i < transform.childCount; i++)
-                DestroyImmediate(transform.GetChild(i).gameObject);
+                DestroyImmediate(transform.GetChild(i).gameObject, true);
             var size = _collider.bounds.size;
-            Debug.Log(size);
             var y = transform.position.y + 0.5f;
-            for (int i = -2; i < size.x - 2; i++)
+            for (int i = 0; i < size.x; i++)
             {
                 for (int j = 0; j < size.z; j++)
                 {
-                    var go = Instantiate(_prefab, new Vector3(i - size.z / 2, y, j - size.x / 2),
+                    var go = Instantiate(_prefab, new Vector3(i - size.x / 2, y, j - size.z / 2),
                         new Quaternion(0, 0, 0, 0),
                         transform.parent);
                     go.transform.parent = transform;

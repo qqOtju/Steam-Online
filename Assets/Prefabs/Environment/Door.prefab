@@ -697,8 +697,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4554482554332971312}
-  - component: {fileID: 8162135535146424455}
   - component: {fileID: 2737344274662504211}
+  - component: {fileID: 8162135535146424455}
   - component: {fileID: 3773530837087697515}
   - component: {fileID: 5082938797186663527}
   m_Layer: 0
@@ -725,6 +725,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2737344274662504211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5166354322319936306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bb5ebe2b2194ec7aacad71810dc23f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _openTime: 1
+  _singleUse: 0
 --- !u!95 &8162135535146424455
 Animator:
   serializedVersion: 5
@@ -746,35 +760,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &2737344274662504211
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5166354322319936306}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2bb5ebe2b2194ec7aacad71810dc23f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _openTime: 1
-  _singleUse: 0
-  _subscribeEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2737344274662504211}
-        m_TargetAssemblyTypeName: Steam.Environment.DoorController, Assembly-CSharp
-        m_MethodName: ToggleDoor
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &3773530837087697515
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -61,5 +61,24 @@ namespace MyMirror
             base.OnServerReady(conn);
             OnSceneChange?.Invoke(conn);
         }
+
+        public void Leave()
+        {
+            if(NetworkServer.activeHost)
+                StopHost();
+            if (NetworkServer.active)
+                StopServer();
+            else if (NetworkClient.active)
+                StopClient();
+        }
+
+        public override void OnStopServer()
+        {
+            foreach (var player in GamePLayers)
+            {
+                Destroy(player.gameObject);
+            }
+            base.OnStopServer();
+        }
     }
 }

@@ -16,7 +16,7 @@ namespace Steam.UI
         [SerializeField] private BoolEvent _sprintChange;
         [SerializeField] private TextMeshProUGUI _sprintStatusText;
         [Header("Settings")] 
-        [SerializeField] private GameObject _settingsPanel;
+        [SerializeField] private GameObject _menuPanel;
         [Header("HealthBar")]
         [SerializeField] private Image _healthBar;
         [SerializeField] private TextMeshProUGUI _nicknameText;
@@ -25,6 +25,9 @@ namespace Steam.UI
         [SerializeField] private FloatConstant _maxHealth;
         [SerializeField] private IntVariable _playerId;
         [SerializeField] private StringVariable _playerName;
+        [Header("Events")]
+        [SerializeField] private BoolEvent _onMenuToggle;
+        [SerializeField] private VoidEvent _onLobbyLeave;
 
         private UIPlayerStatus _playerStatus;
         private Controls _controls;
@@ -57,16 +60,19 @@ namespace Steam.UI
         private void OnDisable() => _controls.Disable();
 
         #endregion
-
-        private void OnEscapePerformed(InputAction.CallbackContext obj) => CloseMenu();
         
-        public void CloseMenu()
+        public void ToggleMenu()
         {
-            
-            _settingsPanel.SetActive(!_settingsPanel.activeSelf);
-            SetCursorState(!_settingsPanel.activeSelf);
+            _menuPanel.SetActive(!_menuPanel.activeSelf);
+            _onMenuToggle.Raise(!_menuPanel.activeSelf);
+            SetCursorState(!_menuPanel.activeSelf);
         }
-        
+
+        public void LeaveLobby() =>
+            _onLobbyLeave.Raise();
+
+        private void OnEscapePerformed(InputAction.CallbackContext obj) => ToggleMenu();
+
         private void SetCursorState(bool newState) =>
             Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
         

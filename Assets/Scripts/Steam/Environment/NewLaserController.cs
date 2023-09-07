@@ -1,4 +1,6 @@
-﻿using Mirror;
+﻿using System;
+using System.Collections.Generic;
+using Mirror;
 using Steam.Interfaces;
 using UnityEngine;
 
@@ -12,9 +14,8 @@ namespace Steam.Environment
         [SerializeField] private float _timeBeforeDamage = 1f;
         [SerializeField] private float _moveTime = 2f;
         [Header("Movement")]
-        [SerializeField] private bool _isStatic = true;
         [SerializeField] private Transform _startTransform;
-        [SerializeField] private Transform[] _movePositions;
+        [SerializeField] private List<Transform> _points;
         [Header("Other")]
         [SerializeField] private GameObject _laserObj;
         [SerializeField] private LayerMask _ignore;
@@ -32,7 +33,7 @@ namespace Steam.Environment
         {
             _laserTransform = _laserObj.transform;
             _scale = _laserObj.transform.lossyScale;
-            if(!_isStatic)
+            if(_points.Count > 1)
                 Move(0);
         }
 
@@ -64,15 +65,32 @@ namespace Steam.Environment
 
         private void OnDestroy() => LeanTween.cancelAll();
 
+        [ContextMenu("Create Point")]
+        private void CreatePoint()
+        {
+            var point = new GameObject($"Point #{_points.Count}");
+            point.transform.parent = transform.parent;
+            point.transform.position = transform.position;
+            _points.Add(point.transform);
+        }
+        
         private void Move(int index)
         {
-            if (index == _movePositions.Length)
+            if (index == _points.Count)
                 index = 0;
             var startPos = transform.position;
-            var endPos = _movePositions[index].position;
+            var endPos = _points[index].position;
             LeanTween.value(0, 1, _moveTime).setOnUpdate(value =>
                 transform.position = Vector3.Lerp(startPos, endPos, value)
             ).setOnComplete(_ => Move(index + 1));
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (_points.Count <= 0) return;
+            const float radius = 0.2f;
+            foreach (var tr in _points)
+                Gizmos.DrawSphere(tr.position, radius);
         }
     }
 }

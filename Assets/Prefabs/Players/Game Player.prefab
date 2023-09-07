@@ -5537,23 +5537,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  _maxHealth: {fileID: 11400000, guid: 29ab1275b7dfe8d4890f05296ae1e925, type: 2}
-  _speed: {fileID: 11400000, guid: e71e32bd004b3174bb59261476b17d4c, type: 2}
-  _sprintSpeed: {fileID: 11400000, guid: 886126758f3e4804ca63282cdc52f75b, type: 2}
-  _airSpeed: {fileID: 11400000, guid: af958d06367e19244a4d3b456e6d0d9f, type: 2}
-  _airSprintSpeed: {fileID: 11400000, guid: 0f4ddf8e51b04d441aae2796a5be5dcb, type: 2}
-  _jumpHeight: {fileID: 11400000, guid: c71f15ead2d9718498933d3423fa512a, type: 2}
-  _currentH: {fileID: 11400000, guid: d5edb547aba68df479a499438b6643a5, type: 2}
-  _isGrounded: {fileID: 11400000, guid: 85a5cacdda24482419a894322d20a647, type: 2}
-  _isSprinting: {fileID: 11400000, guid: 6ed166aebba80424f87f5167f3f17d11, type: 2}
-  _playerIdNumber: {fileID: 11400000, guid: cce85e73fa26fda4ea07aeae034273e0, type: 2}
-  _playerName: {fileID: 11400000, guid: 78c7b2395cbc60846b3b6ef5bea6fb9e, type: 2}
-  _rotationSmoothTime: 0.125
-  _groundedOffset: 1.1
-  _groundedRadius: 0.1
-  _groundLayers:
-    serializedVersion: 2
-    m_Bits: 320
+  _data: {fileID: 11400000, guid: ea037a93c2d8f0a419cc5807591e4f1a, type: 2}
   _cameraTarget: {fileID: 4732905198329807696}
   _meshContainer: {fileID: 88121341916496654}
   _movementCurve:
@@ -5599,6 +5583,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  _onMenuToggle: {fileID: 11400000, guid: ce87b2ad4187f9c4291bf0f2c8e64476, type: 2}
   _clamp: {x: -30, y: 70}
   _mouseSensitivity: {fileID: 11400000, guid: 216fa00cc8ee5f04cbc7ee436df2cf3f, type: 2}
   _virtualCamera: {fileID: 6935753542230798448}

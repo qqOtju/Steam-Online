@@ -10,11 +10,16 @@ namespace Steam.Environment
     {
         [SerializeField] private BoolEvent _triggerEvent;
         [SerializeField] private ParticleSystem _particle;
+        [SerializeField] private bool _oneTimeStep;
+
+        private int _playersCount;
 
         [ServerCallback]
         private void OnTriggerEnter(Collider other)
         {
             if(!other.CompareTag("Player")) return;
+            _playersCount++;
+            if(_playersCount >= 1) return;
             _triggerEvent.Raise(true);
             _particle.Play();
         }
@@ -22,8 +27,10 @@ namespace Steam.Environment
         [ServerCallback]
         private void OnTriggerExit(Collider other)
         {
-            if(!other.CompareTag("Player")) return;
-            _triggerEvent.Raise(false);
+            if(_oneTimeStep || !other.CompareTag("Player")) return;
+            _playersCount--;
+            if(_playersCount <= 0)
+                _triggerEvent.Raise(false);
         }
     }
 }

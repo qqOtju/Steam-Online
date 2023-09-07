@@ -1,8 +1,10 @@
-﻿using Extensions;
+﻿using System;
+using Extensions;
 using Mirror;
 using MyMirror;
 using Steam.Level;
 using Steamworks;
+using UnityAtoms.BaseAtoms;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -13,7 +15,9 @@ namespace Steam.Lobby
         [Header("Panels")]
         [SerializeField] private GameObject _menuPanel;
         [SerializeField] private GameObject _lobbyPanel;
-        [Header("Other")]
+        [Header("Events")]
+        [SerializeField] private VoidEvent _onLobbyLeave;
+        [Header("References")]
         [Scene] [SerializeField] private string _menuScene = null;
         [SerializeField] private MyNetworkManager _networkManager;
         
@@ -33,8 +37,22 @@ namespace Steam.Lobby
             gameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
             lobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
             lobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
-        }     
-        
+            _onLobbyLeave.Register(LeaveLobby);
+        }
+
+        private void Start()
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+
+        private void OnDestroy()
+        {
+            gameLobbyJoinRequested.Dispose();
+            lobbyCreated.Dispose();
+            lobbyEntered.Dispose();
+            _onLobbyLeave.Unregister(LeaveLobby);
+        }
+
         public void HostLobby()
         {
             _menuPanel.SetActive(false);
@@ -42,8 +60,15 @@ namespace Steam.Lobby
             SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, _networkManager.maxConnections);
         }
         
-        //ToDo Lobby leave
-        public void LeaveLobby() { }
+        private void LeaveLobby()
+        {
+            if(!LobbyId.IsLobby()) return;
+            SteamMatchmaking.LeaveLobby(LobbyId);
+            _networkManager.Leave();
+            Destroy(_networkManager.gameObject);
+            Destroy(gameObject);
+            SceneManager.LoadScene(_menuScene.SceneName(), LoadSceneMode.Single);
+        }
         
         public void SetLevel(SOLevelInfo levelInfo) => _currentLevel = levelInfo;
         
