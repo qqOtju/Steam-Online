@@ -1,6 +1,6 @@
 # Steam-Online
-Кооперативний платформер.  
-У грі використовується: 
+A cooperative platformer.  
+The game uses: 
 [Mirror](https://mirror-networking.gitbook.io/docs/),
 [FizzySteamworks](https://github.com/Chykary/FizzySteamworks), 
 [Atoms](https://github.com/unity-atoms/unity-atoms), LeanTween.
